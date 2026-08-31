@@ -4,6 +4,7 @@ import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { SeverityBadge } from '../components/StatusBadge.tsx';
 import { CONTROL_RULES } from '../domain/rules.ts';
 import type { Severity } from '../domain/types.ts';
+import { envLabel } from '../utils/labels.ts';
 
 const SEVERITIES: Array<{ value: Severity | 'all'; label: string }> = [
   { value: 'all', label: 'Alle' },
@@ -71,10 +72,10 @@ export function FindingsPage() {
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle</option>
-              <option value="production">production</option>
-              <option value="test">test</option>
-              <option value="development">development</option>
-              <option value="unknown">unknown</option>
+              <option value="production">{envLabel('production')}</option>
+              <option value="test">{envLabel('test')}</option>
+              <option value="development">{envLabel('development')}</option>
+              <option value="unknown">{envLabel('unknown')}</option>
             </select>
           </label>
           <label className="block">
@@ -131,7 +132,9 @@ export function FindingsPage() {
                     <span className="text-xs font-medium text-slate-500">
                       {f.ruleId} · {f.ruleTitle}
                     </span>
-                    <span className="text-xs text-slate-500">Miljø: {f.environment}</span>
+                    <span className="text-xs text-slate-500">
+                      Miljø: {envLabel(f.environment)}
+                    </span>
                   </div>
                   <Link
                     to={`/agents/${encodeURIComponent(f.agentId)}`}

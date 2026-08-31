@@ -30,8 +30,24 @@ export function daysSince(value: string | Date | null | undefined, now: Date = n
   return Math.floor(ms / (24 * 60 * 60 * 1000));
 }
 
+const DEMO_HOST_SUFFIXES = ['.demo', '.example', '.test', '.invalid', '.localhost'];
+const DEMO_EXACT_HOSTS = new Set(['git.demo', 'example.com', 'example.org', 'example.net', 'localhost']);
+
+export function isDemoUrl(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  try {
+    const u = new URL(value);
+    const host = u.hostname.toLowerCase();
+    if (DEMO_EXACT_HOSTS.has(host)) return true;
+    return DEMO_HOST_SUFFIXES.some((s) => host === s.slice(1) || host.endsWith(s));
+  } catch {
+    return false;
+  }
+}
+
 export function isSafeHttpsUrl(value: unknown): value is string {
   if (typeof value !== 'string') return false;
+  if (isDemoUrl(value)) return false;
   try {
     const u = new URL(value);
     return u.protocol === 'https:';

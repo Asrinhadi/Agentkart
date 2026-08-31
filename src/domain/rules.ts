@@ -436,20 +436,32 @@ export function ruleMissingLogging(agent: ReconciledAgent, now: Date): Finding |
   const declaredLogging = declared.loggingEnabled;
   const observedLogging = agent.observations.some((o) => o.loggingDetected === true);
   const observedFalse = agent.observations.some((o) => o.loggingDetected === false);
+  const hasObservations = agent.observations.length > 0;
 
   if (declaredLogging && observedLogging) return null;
 
-  const explanation = !declaredLogging
-    ? 'Registeret oppgir at logging ikke er aktivert for denne produksjonsagenten.'
-    : observedFalse
-      ? 'Registeret oppgir logging som aktivert, men datakilden har observert at logging ikke er på.'
-      : 'Ingen datakilde har bekreftet at logging faktisk skjer.';
+  let summary: string;
+  let explanation: string;
+  if (!declaredLogging) {
+    summary = 'Logging er ikke aktivert i registeret.';
+    explanation =
+      'Registeret oppgir at logging ikke er aktivert for denne produksjonsagenten.';
+  } else if (observedFalse) {
+    summary = 'Logging observert som ikke aktiv.';
+    explanation =
+      'Registeret oppgir logging som aktivert, men datakilden har observert at logging ikke er på.';
+  } else {
+    summary = 'Logging ikke bekreftet.';
+    explanation = hasObservations
+      ? 'Registeret oppgir logging som aktivert, men ingen datakilde har bekreftet at logging faktisk skjer. Fraværet kan skyldes manglende signal fra observasjonskildene, ikke nødvendigvis at logging mangler.'
+      : 'Registeret oppgir logging som aktivert, men det finnes ingen tekniske observasjoner som kan bekrefte dette. Manglende observasjoner er ikke det samme som manglende logging.';
+  }
 
   return makeFinding({
     ruleId: 'AK-R8',
     severity: 'high',
     agent,
-    summary: 'Logging er ikke bekreftet aktiv i produksjon.',
+    summary,
     explanation,
     recommendedAction:
       'Aktiver sporbar logging og definer hvilke hendelser som skal kunne revideres.',

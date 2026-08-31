@@ -3,6 +3,7 @@ import { AlertTriangle, Database, ShieldAlert, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
+import { sourceStatusLabel } from '../utils/labels.ts';
 
 function KpiCard({
   label,
@@ -235,14 +236,31 @@ export function OverviewPage() {
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">Datakildedekning</h2>
             <ul className="mt-3 space-y-2 text-sm">
-              {sources.map((s) => (
-                <li key={s.sourceId} className="flex items-center justify-between gap-2">
-                  <span className="truncate text-slate-700">{s.name}</span>
-                  <Badge tone={s.status === 'ok' ? 'ok' : s.status === 'degraded' ? 'warning' : 'critical'}>
-                    {observationsBySource.get(s.sourceId) ?? 0} obs.
-                  </Badge>
-                </li>
-              ))}
+              {sources.map((s) => {
+                const isRegistry = s.type === 'declared_registry';
+                const count = observationsBySource.get(s.sourceId) ?? 0;
+                const label = isRegistry
+                  ? `${declared.length} registerposter`
+                  : `${count} obs.`;
+                return (
+                  <li key={s.sourceId} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-slate-700" title={sourceStatusLabel(s.status)}>
+                      {s.name}
+                    </span>
+                    <Badge
+                      tone={
+                        s.status === 'ok'
+                          ? 'ok'
+                          : s.status === 'degraded'
+                            ? 'warning'
+                            : 'critical'
+                      }
+                    >
+                      {label}
+                    </Badge>
+                  </li>
+                );
+              })}
             </ul>
             <p className="mt-3 text-xs text-slate-500">
               Sist observasjon: {lastObservedAt ? formatDateNb(new Date(lastObservedAt)) : 'Ukjent'}

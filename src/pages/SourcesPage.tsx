@@ -8,6 +8,7 @@ import {
   importObservationsFromFile,
 } from '../services/import.ts';
 import { formatDateNb } from '../utils/format.ts';
+import { sourceStatusLabel, sourceTypeLabel } from '../utils/labels.ts';
 
 type ImportKind = 'registry' | 'observations';
 
@@ -96,26 +97,49 @@ export function SourcesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {sources.map((s) => (
-                <tr key={s.sourceId}>
-                  <td className="px-3 py-2 font-medium text-slate-900">{s.name}</td>
-                  <td className="px-3 py-2 text-slate-700">{s.type}</td>
-                  <td className="px-3 py-2">
-                    <Badge
-                      tone={s.status === 'ok' ? 'ok' : s.status === 'degraded' ? 'warning' : 'critical'}
-                    >
-                      {s.status}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {observationsBySource.get(s.sourceId) ?? 0}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {formatDateNb(s.lastObservedAt)}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">{s.coverage ?? '—'}</td>
-                </tr>
-              ))}
+              {sources.map((s) => {
+                const isRegistry = s.type === 'declared_registry';
+                const observationsForSource = observationsBySource.get(s.sourceId) ?? 0;
+                return (
+                  <tr key={s.sourceId}>
+                    <td className="px-3 py-2 font-medium text-slate-900">{s.name}</td>
+                    <td className="px-3 py-2 text-slate-700">{sourceTypeLabel(s.type)}</td>
+                    <td className="px-3 py-2">
+                      <Badge
+                        tone={
+                          s.status === 'ok'
+                            ? 'ok'
+                            : s.status === 'degraded'
+                              ? 'warning'
+                              : 'critical'
+                        }
+                      >
+                        {sourceStatusLabel(s.status)}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {isRegistry
+                        ? `${declared.length} registerposter`
+                        : observationsForSource}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {formatDateNb(s.lastObservedAt)}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {isRegistry ? (
+                        <span>
+                          {s.coverage ?? '—'}
+                          <span className="ml-1 block text-xs text-slate-500">
+                            Ikke en teknisk observasjonskilde.
+                          </span>
+                        </span>
+                      ) : (
+                        (s.coverage ?? '—')
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

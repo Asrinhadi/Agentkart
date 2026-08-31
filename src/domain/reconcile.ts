@@ -174,13 +174,16 @@ function buildEvidence(
         const declaredHumanApproval = declared.humanApprovalRequired;
         const conflict = obs.autoApprove && declaredHumanApproval;
         evidence.push({
-          kind: conflict ? 'mismatch' : 'match',
-          field: 'humanApproval',
-          declaredValue: declaredHumanApproval,
-          observedValue: !obs.autoApprove,
+          kind: conflict ? 'mismatch' : 'observation_only',
+          field: 'autoApprove',
+          declaredValue: declaredHumanApproval ? 'menneskelig godkjenning påkrevd' : null,
+          observedValue: obs.autoApprove,
           sourceId: obs.sourceId,
           observedAt: obs.observedAt,
           confidence: obs.confidence,
+          note: conflict
+            ? 'Automatisk godkjenning er observert selv om registeret krever menneskelig godkjenning.'
+            : undefined,
         });
       }
 

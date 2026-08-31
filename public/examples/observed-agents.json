@@ -7,7 +7,6 @@
       "name": "Godkjent agentregister",
       "type": "declared_registry",
       "status": "ok",
-      "observationCount": 9,
       "lastObservedAt": "2026-09-01T09:00:00Z",
       "coverage": "Register administrert av governance-teamet"
     },
@@ -16,7 +15,6 @@
       "name": "Kodeskann av intern GitHub",
       "type": "code_scan",
       "status": "ok",
-      "observationCount": 8,
       "lastObservedAt": "2026-08-31T04:30:00Z",
       "coverage": "Repositorier under organisasjonen /agentkart-demo"
     },
@@ -25,7 +23,6 @@
       "name": "Endepunktobservasjon",
       "type": "endpoint",
       "status": "degraded",
-      "observationCount": 6,
       "lastObservedAt": "2026-08-31T22:15:00Z",
       "coverage": "Utvalgte prod-servere med agenter i drift"
     },
@@ -34,7 +31,6 @@
       "name": "Plattformregister (Copilot og lignende)",
       "type": "platform",
       "status": "ok",
-      "observationCount": 4,
       "lastObservedAt": "2026-08-30T18:00:00Z",
       "coverage": "Rapportert av leverandørportaler"
     }

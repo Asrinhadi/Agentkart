@@ -6,6 +6,7 @@ import { Badge } from '../components/StatusBadge.tsx';
 import { STATUS_LABEL, overallStatus } from '../domain/status.ts';
 import type { OverallAgentStatus, Severity } from '../domain/types.ts';
 import { formatDateShortNb } from '../utils/format.ts';
+import { approvalLabel, envLabel } from '../utils/labels.ts';
 
 const STATUS_ORDER: OverallAgentStatus[] = [
   'critical',
@@ -79,7 +80,7 @@ export function AgentsPage() {
           : agent.observations.some((o) => o.writeCapability)
             ? 'Skrive (observert)'
             : 'Kun lese';
-        const approval = agent.declared?.approvalStatus ?? 'ikke registrert';
+        const approval = approvalLabel(agent.declared?.approvalStatus);
         const lastReviewed = agent.declared?.lastReviewedAt ?? null;
         const agentFindings = findings.filter((f) => f.agentId === agent.id);
         const worst: Severity | undefined = agentFindings[0]?.severity;
@@ -168,9 +169,9 @@ export function AgentsPage() {
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle miljøer</option>
-              <option value="production">Produksjon</option>
-              <option value="test">Test</option>
-              <option value="development">Utvikling</option>
+              <option value="production">{envLabel('production')}</option>
+              <option value="test">{envLabel('test')}</option>
+              <option value="development">{envLabel('development')}</option>
             </select>
           </label>
 
@@ -308,7 +309,7 @@ export function AgentsPage() {
                     className="cursor-pointer hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
                   >
                     <td className="px-3 py-2 font-medium text-slate-900">{row.agent.displayName}</td>
-                    <td className="px-3 py-2 text-slate-700">{row.env}</td>
+                    <td className="px-3 py-2 text-slate-700">{envLabel(row.env)}</td>
                     <td className="px-3 py-2 text-slate-700">{row.framework}</td>
                     <td className="px-3 py-2 text-slate-700">{row.owner ?? '—'}</td>
                     <td className="px-3 py-2 text-slate-700">

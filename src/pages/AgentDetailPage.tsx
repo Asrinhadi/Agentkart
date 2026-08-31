@@ -3,12 +3,19 @@ import { ArrowLeft, CheckCircle2, CircleAlert, MinusCircle } from 'lucide-react'
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { STATUS_LABEL, overallStatus } from '../domain/status.ts';
-import { formatDateNb, isSafeHttpsUrl } from '../utils/format.ts';
+import { formatDateNb, isDemoUrl, isSafeHttpsUrl } from '../utils/format.ts';
+import {
+  approvalLabel,
+  booleanLabel,
+  envLabel,
+  lifecycleLabel,
+  toolPermissionLabel,
+} from '../utils/labels.ts';
 import type { Evidence, ReconciledAgent } from '../domain/types.ts';
 
-function renderValue(v: unknown): string {
+function renderValue(v: unknown, boolAsYesNo = true): string {
   if (v === null || v === undefined) return '—';
-  if (typeof v === 'boolean') return v ? 'Ja' : 'Nei';
+  if (typeof v === 'boolean') return boolAsYesNo ? (v ? 'Ja' : 'Nei') : String(v);
   if (Array.isArray(v)) return v.length === 0 ? '—' : v.join(', ');
   if (typeof v === 'object') {
     try {
@@ -22,6 +29,13 @@ function renderValue(v: unknown): string {
 
 function SafeUrl({ value }: { value: string | undefined }) {
   if (!value) return <span className="text-slate-500">—</span>;
+  if (isDemoUrl(value)) {
+    return (
+      <span className="text-slate-600" title={value}>
+        Fiktiv repositoryadresse i demodata
+      </span>
+    );
+  }
   if (isSafeHttpsUrl(value)) {
     return (
       <a
@@ -37,20 +51,27 @@ function SafeUrl({ value }: { value: string | undefined }) {
   return <span className="text-slate-700">{value}</span>;
 }
 
+type CompareStatus = 'match' | 'mismatch' | 'declared_only' | 'observed_only' | 'unknown';
+
+interface ComparisonRowProps {
+  label: string;
+  declared: unknown;
+  observations: Array<{ value: unknown; sourceId: string; observedAt: string; confidence?: number }>;
+  renderDeclared?: (v: unknown) => string;
+  renderObserved?: (v: unknown) => string;
+}
+
 function ComparisonRow({
   label,
   declared,
   observations,
-}: {
-  label: string;
-  declared: unknown;
-  observations: Array<{ value: unknown; sourceId: string; observedAt: string; confidence?: number }>;
-}) {
-  const declaredText = renderValue(declared);
-  const uniqueObserved = Array.from(
-    new Set(observations.map((o) => renderValue(o.value))),
-  );
-  let status: 'match' | 'mismatch' | 'declared_only' | 'observed_only' | 'unknown';
+  renderDeclared,
+  renderObserved,
+}: ComparisonRowProps) {
+  const declaredText = renderDeclared ? renderDeclared(declared) : renderValue(declared);
+  const rObs = renderObserved ?? renderValue;
+  const uniqueObserved = Array.from(new Set(observations.map((o) => rObs(o.value))));
+  let status: CompareStatus;
   if (observations.length === 0) {
     status = declared === undefined || declared === null || declared === '' ? 'unknown' : 'declared_only';
   } else if (declared === undefined || declared === null || declared === '') {
@@ -69,7 +90,7 @@ function ComparisonRow({
           : status === 'declared_only'
             ? 'info'
             : 'muted';
-  const label2: Record<typeof status, string> = {
+  const statusLabel: Record<CompareStatus, string> = {
     match: 'Samsvar',
     mismatch: 'Motstrid',
     declared_only: 'Bare deklarert',
@@ -82,7 +103,7 @@ function ComparisonRow({
       <div>
         <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
         <div className="mt-1">
-          <Badge tone={tone}>{label2[status]}</Badge>
+          <Badge tone={tone}>{statusLabel[status]}</Badge>
         </div>
       </div>
       <div>
@@ -97,7 +118,7 @@ function ComparisonRow({
           <ul className="mt-1 space-y-1 text-sm text-slate-900">
             {observations.map((o, i) => (
               <li key={`${o.sourceId}-${i}`}>
-                {renderValue(o.value)}{' '}
+                {rObs(o.value)}{' '}
                 <span className="text-xs text-slate-500">
                   ({o.sourceId}, {formatDateNb(o.observedAt)}
                   {typeof o.confidence === 'number' ? `, confidence ${o.confidence.toFixed(2)}` : ''})
@@ -151,6 +172,17 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             ? 'info'
             : 'ok';
 
+  const autoApproveObs = observations.filter((o) => typeof o.autoApprove === 'boolean');
+  const autoApproveObserved: boolean | null =
+    autoApproveObs.length === 0
+      ? null
+      : autoApproveObs.some((o) => o.autoApprove === true);
+  const humanApprovalRequired = declared?.humanApprovalRequired ?? null;
+  const approvedControlPoint =
+    declared !== null &&
+    declared.humanApprovalRequired &&
+    declared.approvalStatus === 'approved';
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -195,7 +227,9 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Miljø</dt>
-              <dd className="text-slate-900">{declared?.environment ?? first?.environment ?? 'Ukjent'}</dd>
+              <dd className="text-slate-900">
+                {envLabel(declared?.environment ?? first?.environment)}
+              </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Rammeverk</dt>
@@ -205,7 +239,7 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Livssyklus</dt>
-              <dd className="text-slate-900">{declared?.lifecycleStatus ?? 'ukjent'}</dd>
+              <dd className="text-slate-900">{lifecycleLabel(declared?.lifecycleStatus)}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-slate-500">Eierteam</dt>
@@ -233,7 +267,9 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">Datakategorier, verktøy og MCP</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Datakategorier, verktøy og MCP
+          </h2>
           <div className="mt-3 space-y-3 text-sm">
             <div>
               <div className="text-xs text-slate-500">Deklarerte datakategorier</div>
@@ -244,9 +280,8 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             <div>
               <div className="text-xs text-slate-500">Observerte datakategorier</div>
               <div className="mt-1 text-slate-900">
-                {Array.from(
-                  new Set(observations.flatMap((o) => o.dataCategories)),
-                ).join(', ') || '—'}
+                {Array.from(new Set(observations.flatMap((o) => o.dataCategories))).join(', ') ||
+                  '—'}
               </div>
             </div>
             <div>
@@ -256,7 +291,7 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
                   o.tools.map((t, i) => (
                     <li key={`${o.observationId}-tool-${i}`}>
                       <span className="font-medium">{t.name}</span>{' '}
-                      <span className="text-slate-500">({t.permission})</span>
+                      <span className="text-slate-500">({toolPermissionLabel(t.permission)})</span>
                     </li>
                   )),
                 )}
@@ -270,12 +305,15 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
               <ul className="mt-1 space-y-1 text-slate-900">
                 {observations.flatMap((o) =>
                   o.mcpServers.map((m, i) => (
-                    <li key={`${o.observationId}-mcp-${i}`} className="flex items-center gap-2">
+                    <li
+                      key={`${o.observationId}-mcp-${i}`}
+                      className="flex items-center gap-2"
+                    >
                       <span className="font-medium">{m.name}</span>
                       {m.verified ? (
-                        <Badge tone="ok">verifisert</Badge>
+                        <Badge tone="ok">Verifisert</Badge>
                       ) : (
-                        <Badge tone="critical">uverifisert</Badge>
+                        <Badge tone="critical">Uverifisert</Badge>
                       )}
                     </li>
                   )),
@@ -285,22 +323,46 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
                 ) : null}
               </ul>
             </div>
-            <div>
-              <div className="text-xs text-slate-500">Logging og godkjenning (deklarert)</div>
-              <ul className="mt-1 space-y-1 text-slate-900">
-                <li>Logging: {declared ? (declared.loggingEnabled ? 'aktiv' : 'ikke aktiv') : '—'}</li>
-                <li>
-                  Menneskelig godkjenning:{' '}
-                  {declared ? (declared.humanApprovalRequired ? 'påkrevd' : 'ikke påkrevd') : '—'}
-                </li>
-                <li>
-                  Godkjenningsstatus:{' '}
-                  {declared ? declared.approvalStatus : '—'}
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 className="text-base font-semibold text-slate-900">Godkjenning og kontroll</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Menneskelig kontroll kan ikke direkte observeres teknisk. Vi viser derfor tre separate
+          fakta – ikke ett samlet «ja/nei».
+        </p>
+        <dl className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+          <div className="rounded-md border border-slate-200 p-3">
+            <dt className="text-xs uppercase text-slate-500">Automatisk godkjenning (observert)</dt>
+            <dd className="mt-1 text-slate-900">
+              {autoApproveObserved === null
+                ? 'Ukjent'
+                : booleanLabel(autoApproveObserved)}
+            </dd>
+            <p className="mt-1 text-xs text-slate-500">
+              Basert på observert <code>autoApprove</code>.
+            </p>
+          </div>
+          <div className="rounded-md border border-slate-200 p-3">
+            <dt className="text-xs uppercase text-slate-500">Menneskelig kontroll</dt>
+            <dd className="mt-1 text-slate-900">Ukjent</dd>
+            <p className="mt-1 text-xs text-slate-500">
+              Faktisk menneskelig gjennomgang observeres ikke teknisk av demoen.
+            </p>
+          </div>
+          <div className="rounded-md border border-slate-200 p-3">
+            <dt className="text-xs uppercase text-slate-500">
+              Godkjent kontrollpunkt i registeret
+            </dt>
+            <dd className="mt-1 text-slate-900">{booleanLabel(approvedControlPoint)}</dd>
+            <p className="mt-1 text-xs text-slate-500">
+              Registeret krever menneskelig godkjenning: {booleanLabel(humanApprovalRequired)} ·
+              Status: {approvalLabel(declared?.approvalStatus)}
+            </p>
+          </div>
+        </dl>
       </section>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -319,6 +381,8 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             label="Miljø"
             declared={declared?.environment}
             observations={observedFor('environment')}
+            renderDeclared={(v) => envLabel(v as string | undefined)}
+            renderObserved={(v) => envLabel(v as string | undefined)}
           />
           <ComparisonRow
             label="Rammeverk"
@@ -334,18 +398,6 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
             label="Skrivetilgang"
             declared={declared?.writeCapability}
             observations={observedFor('writeCapability')}
-          />
-          <ComparisonRow
-            label="Menneskelig godkjenning"
-            declared={declared?.humanApprovalRequired}
-            observations={observations
-              .filter((o) => typeof o.autoApprove === 'boolean')
-              .map((o) => ({
-                value: !o.autoApprove,
-                sourceId: o.sourceId,
-                observedAt: o.observedAt,
-                confidence: o.confidence,
-              }))}
           />
           <ComparisonRow
             label="Logging"
@@ -381,13 +433,12 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
         ) : (
           <ul className="mt-3 space-y-3">
             {relevantFindings.map((f) => (
-              <li
-                key={f.id}
-                className="rounded-md border border-slate-200 p-3"
-              >
+              <li key={f.id} className="rounded-md border border-slate-200 p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <SeverityBadge severity={f.severity} />
-                  <span className="text-xs text-slate-500">{f.ruleId} · {f.ruleTitle}</span>
+                  <span className="text-xs text-slate-500">
+                    {f.ruleId} · {f.ruleTitle}
+                  </span>
                 </div>
                 <p className="mt-2 text-sm font-medium text-slate-900">{f.summary}</p>
                 <p className="mt-1 text-sm text-slate-700">{f.explanation}</p>

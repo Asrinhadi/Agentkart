@@ -29,7 +29,6 @@ export interface ObservationSource {
   name: string;
   type: SourceType;
   status: 'ok' | 'degraded' | 'unavailable';
-  observationCount: number;
   lastObservedAt?: string;
   coverage?: string;
 }

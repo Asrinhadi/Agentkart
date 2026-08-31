@@ -97,7 +97,6 @@ export const observationSourceSchema = z
     name: shortText,
     type: sourceTypeSchema,
     status: z.enum(['ok', 'degraded', 'unavailable']),
-    observationCount: z.number().int().min(0).max(100000),
     lastObservedAt: optionalIsoDate,
     coverage: optionalShortText,
   })
