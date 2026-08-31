@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-01T09:00:00Z",
+  "sources": [
+    {
+      "sourceId": "src-registry",
+      "name": "Godkjent agentregister",
+      "type": "declared_registry",
+      "status": "ok",
+      "observationCount": 9,
+      "lastObservedAt": "2026-09-01T09:00:00Z",
+      "coverage": "Register administrert av governance-teamet"
+    },
+    {
+      "sourceId": "src-code-scan",
+      "name": "Kodeskann av intern GitHub",
+      "type": "code_scan",
+      "status": "ok",
+      "observationCount": 8,
+      "lastObservedAt": "2026-08-31T04:30:00Z",
+      "coverage": "Repositorier under organisasjonen /agentkart-demo"
+    },
+    {
+      "sourceId": "src-endpoint",
+      "name": "Endepunktobservasjon",
+      "type": "endpoint",
+      "status": "degraded",
+      "observationCount": 6,
+      "lastObservedAt": "2026-08-31T22:15:00Z",
+      "coverage": "Utvalgte prod-servere med agenter i drift"
+    },
+    {
+      "sourceId": "src-platform",
+      "name": "Plattformregister (Copilot og lignende)",
+      "type": "platform",
+      "status": "ok",
+      "observationCount": 4,
+      "lastObservedAt": "2026-08-30T18:00:00Z",
+      "coverage": "Rapportert av leverandørportaler"
+    }
+  ],
+  "observations": [
+    {
+      "observationId": "obs-001",
+      "sourceId": "src-endpoint",
+      "agentKey": "customer-insight-assistant",
+      "name": "Customer Insight Assistant",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/customer-insight",
+      "entryPoint": "src/index.ts",
+      "framework": "LangGraph",
+      "tools": [
+        { "name": "search_reports", "permission": "read" },
+        { "name": "summarize", "permission": "read" }
+      ],
+      "mcpServers": [{ "name": "internal-docs-mcp", "verified": true, "approved": true }],
+      "dataCategories": ["kundedata_aggregert", "interne_rapporter"],
+      "writeCapability": false,
+      "autoApprove": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-30T20:00:00Z",
+      "confidence": 0.95
+    },
+    {
+      "observationId": "obs-002",
+      "sourceId": "src-endpoint",
+      "agentKey": "invoice-reconciliation-agent",
+      "name": "Invoice Reconciliation Agent",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/invoice-reconciliation",
+      "entryPoint": "src/main.ts",
+      "framework": "OpenAI Agents SDK",
+      "tools": [
+        { "name": "read_invoice", "permission": "read" },
+        { "name": "update_reconciliation", "permission": "write" }
+      ],
+      "mcpServers": [
+        { "name": "erp-mcp", "verified": true, "approved": true },
+        { "name": "invoice-store-mcp", "verified": true, "approved": true }
+      ],
+      "dataCategories": ["fakturametadata", "leverandørdata"],
+      "writeCapability": true,
+      "autoApprove": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-31T09:12:00Z",
+      "confidence": 0.98
+    },
+    {
+      "observationId": "obs-003",
+      "sourceId": "src-code-scan",
+      "agentKey": "hr-candidate-summary",
+      "name": "HR Candidate Summary",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/hr-candidate-summary",
+      "entryPoint": "app/agent.ts",
+      "framework": "Claude Code",
+      "tools": [
+        { "name": "read_cv", "permission": "read" },
+        { "name": "summarize_notes", "permission": "read" }
+      ],
+      "mcpServers": [],
+      "dataCategories": ["personopplysninger", "rekrutteringsdata"],
+      "writeCapability": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-29T14:22:00Z",
+      "confidence": 0.9
+    },
+    {
+      "observationId": "obs-004",
+      "sourceId": "src-endpoint",
+      "agentKey": "database-maintenance-agent",
+      "name": "Database Maintenance Agent",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/db-maintenance",
+      "entryPoint": "src/agent.ts",
+      "framework": "Custom",
+      "tools": [
+        { "name": "run_maintenance_sql", "permission": "execute" },
+        { "name": "drop_stale_indexes", "permission": "write" }
+      ],
+      "mcpServers": [{ "name": "ops-mcp", "verified": true, "approved": true }],
+      "dataCategories": ["driftsmetadata"],
+      "writeCapability": true,
+      "autoApprove": true,
+      "loggingDetected": true,
+      "observedAt": "2026-08-31T02:00:00Z",
+      "confidence": 0.99
+    },
+    {
+      "observationId": "obs-005",
+      "sourceId": "src-endpoint",
+      "agentKey": "support-triage-agent",
+      "name": "Support Triage Agent",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/support-triage",
+      "entryPoint": "src/main.ts",
+      "framework": "LangGraph",
+      "tools": [{ "name": "classify_ticket", "permission": "read" }],
+      "mcpServers": [{ "name": "ticket-mcp", "verified": true, "approved": true }],
+      "dataCategories": ["supportsaker"],
+      "writeCapability": false,
+      "autoApprove": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-28T11:00:00Z",
+      "confidence": 0.92
+    },
+    {
+      "observationId": "obs-006",
+      "sourceId": "src-code-scan",
+      "agentKey": "procurement-research-agent",
+      "name": "Procurement Research Agent",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/procurement-research",
+      "entryPoint": "src/index.ts",
+      "framework": "OpenAI Agents SDK",
+      "tools": [{ "name": "search_web", "permission": "read" }],
+      "mcpServers": [
+        { "name": "erp-mcp", "verified": true, "approved": true },
+        {
+          "name": "unofficial-supplier-lookup-mcp",
+          "url": "https://third-party.example/mcp",
+          "verified": false,
+          "approved": false,
+          "description": "Tredjeparts oppslagstjeneste, ikke godkjent i registeret."
+        }
+      ],
+      "dataCategories": ["leverandørdata", "markedsdata"],
+      "writeCapability": false,
+      "autoApprove": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-27T08:00:00Z",
+      "confidence": 0.88
+    },
+    {
+      "observationId": "obs-007",
+      "sourceId": "src-code-scan",
+      "name": "Internal Code Assistant",
+      "environment": "production",
+      "repositoryUrl": "https://git.demo/agents/internal-code-assistant",
+      "entryPoint": "src/main.ts",
+      "framework": "Custom",
+      "tools": [
+        { "name": "read_repo", "permission": "read" },
+        { "name": "commit_patch", "permission": "write" }
+      ],
+      "mcpServers": [{ "name": "internal-docs-mcp", "verified": true, "approved": true }],
+      "dataCategories": ["kildekode", "interne_dokumenter"],
+      "writeCapability": true,
+      "autoApprove": false,
+      "loggingDetected": false,
+      "observedAt": "2026-08-25T13:45:00Z",
+      "confidence": 0.82
+    },
+    {
+      "observationId": "obs-008",
+      "sourceId": "src-platform",
+      "agentKey": "sales-copilot-agent",
+      "name": "Sales Copilot Agent",
+      "environment": "test",
+      "repositoryUrl": "https://git.demo/agents/sales-copilot",
+      "entryPoint": "src/main.ts",
+      "framework": "OpenAI Agents SDK",
+      "tools": [
+        { "name": "draft_offer", "permission": "read" },
+        { "name": "read_crm", "permission": "read" }
+      ],
+      "mcpServers": [{ "name": "crm-mcp", "verified": true, "approved": true }],
+      "dataCategories": ["salgsdata"],
+      "writeCapability": false,
+      "autoApprove": false,
+      "loggingDetected": true,
+      "observedAt": "2026-08-26T15:00:00Z",
+      "confidence": 0.8
+    },
+    {
+      "observationId": "obs-009",
+      "sourceId": "src-code-scan",
+      "agentKey": "development-test-agent",
+      "name": "Development Test Agent",
+      "environment": "development",
+      "repositoryUrl": "https://git.demo/agents/dev-test",
+      "entryPoint": "src/index.ts",
+      "framework": "Claude Code",
+      "tools": [
+        { "name": "write_file", "permission": "write" },
+        { "name": "run_snippet", "permission": "execute" }
+      ],
+      "mcpServers": [],
+      "dataCategories": ["syntetiske_testdata"],
+      "writeCapability": true,
+      "autoApprove": true,
+      "loggingDetected": false,
+      "observedAt": "2026-08-24T10:00:00Z",
+      "confidence": 0.9
+    }
+  ]
+}
