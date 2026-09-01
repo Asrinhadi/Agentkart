@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Database, ShieldAlert, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Database, PlayCircle, ShieldAlert, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
@@ -113,22 +113,57 @@ export function OverviewPage() {
     .sort((a, b) => b - a)[0];
 
   return (
-    <div className="space-y-8">
-      <section>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          Hva virksomheten tror den har – mot hva som faktisk er observert
+    <div className="space-y-10">
+      <section
+        aria-labelledby="hero-heading"
+        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10"
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest text-sky-700">
+          KI-styring og sikkerhet
+        </p>
+        <h1
+          id="hero-heading"
+          className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-4xl md:text-[36px]"
+        >
+          Finn skyggeagenter før de blir en sikkerhetsrisiko
         </h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Agentkart samler deklarerte opplysninger og tekniske observasjoner i én sporbar oversikt.
-          Konseptdemo – funnene er basert på importerte observasjoner, ikke en aktiv
-          nettverksskanning.
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
+          Agentkart sammenligner virksomhetens godkjente agentregister med tekniske
+          observasjoner og viser ukjente agenter, avvik, manglende eierskap og kontrollbehov.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Link
+            to="/findings"
+            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800"
+          >
+            <PlayCircle className="h-4 w-4" aria-hidden="true" />
+            Start 90-sekunders demo
+          </Link>
+          <Link
+            to="/agents"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+          >
+            Utforsk agentinventaret
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <p className="mt-4 text-xs text-slate-500">
+          Syntetiske data · Konseptdemo · Filene behandles lokalt
         </p>
       </section>
 
-      <section aria-labelledby="kpi-heading" className="space-y-3">
-        <h2 id="kpi-heading" className="sr-only">
-          Nøkkeltall
-        </h2>
+      <section aria-labelledby="dashboard-heading" className="space-y-4">
+        <div>
+          <h2
+            id="dashboard-heading"
+            className="text-xl font-semibold text-slate-900"
+          >
+            Hva virksomheten tror den har – mot hva som faktisk er observert
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Nøkkeltall avledet direkte fra register og observasjoner.
+          </p>
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard
             label="Registrerte agenter"
