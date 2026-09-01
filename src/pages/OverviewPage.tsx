@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Database, ExternalLink, GitCompare, Info, PlayCircle, Radar, Rocket, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Database, ExternalLink, GitCompare, Info, Radar, Rocket, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
@@ -150,8 +150,8 @@ export function OverviewPage() {
             to="/findings"
             className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800"
           >
-            <PlayCircle className="h-4 w-4" aria-hidden="true" />
-            Start 90-sekunders demo
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+            Se prioriterte avvik
           </Link>
           <Link
             to="/agents"
@@ -458,10 +458,10 @@ export function OverviewPage() {
 
           <p className="mt-3 text-sm text-slate-700">
             <span className="font-semibold text-slate-900">Min rolle:</span>{' '}
-            Jeg har designet og utviklet hele demoen selv: domenemodell, avstemmingsmotor,
-            åtte kontrollregler, JSON-import med streng validering, samt hele grensesnittet
-            i React og Tailwind. Sikkerhet er innebygd fra start – ingen data forlater
-            nettleseren.
+            Jeg har utviklet konseptet, definert problemstillingen og kravene, og bygget
+            og kvalitetssikret demoen med AI-assistert utvikling. Jeg har selv vurdert
+            domenemodellen, kontrollreglene, sikkerhetsbegrensningene og videreutviklingen
+            av løsningen.
           </p>
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">

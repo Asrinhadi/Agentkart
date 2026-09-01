@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   ListChecks,
   Menu,
-  PlayCircle,
   RefreshCw,
   Users,
   X,
@@ -151,8 +150,8 @@ export function MainLayout() {
               to="/findings"
               className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
             >
-              <PlayCircle className="h-4 w-4" aria-hidden="true" />
-              Start demo
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+              Se prioriterte avvik
             </Link>
             <DemoOptionsMenu onReset={reset} />
           </div>
