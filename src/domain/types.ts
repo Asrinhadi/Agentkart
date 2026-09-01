@@ -129,12 +129,20 @@ export interface Finding {
   createdAt: string;
 }
 
+export interface ControlReference {
+  source: string;
+  control: string;
+  appliesWhen: string;
+  version: string;
+}
+
 export interface ControlRule {
   id: string;
   title: string;
   description: string;
   defaultSeverity: Severity;
   rationale: string;
+  references: ControlReference[];
 }
 
 export interface DeclaredRegistryFile {

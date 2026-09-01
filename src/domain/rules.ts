@@ -16,6 +16,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'high',
     rationale:
       'Skyggeagenter uten registrering unndras styring og risikovurdering. I produksjon er dette kritisk.',
+    references: [
+      {
+        source: 'Intern agentregisterpolicy',
+        control: 'AK-POL-001',
+        appliesWhen: 'Alle miljøer',
+        version: 'v1.0',
+      },
+      {
+        source: 'NIST AI RMF',
+        control: 'GOVERN 1.4 – System inventory',
+        appliesWhen: 'Ved etablert AI-styring',
+        version: 'AI RMF 1.0 (jan. 2023)',
+      },
+      {
+        source: 'EU AI Act',
+        control: 'Art. 49 – Registrering i EU-database',
+        appliesWhen: 'Bare ved høyrisikosystemer',
+        version: 'Forordning (EU) 2024/1689',
+      },
+    ],
   },
   {
     id: 'AK-R2',
@@ -25,6 +45,20 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'medium',
     rationale:
       'Register og virkelighet bør stemme overens. Agenter som ikke lenger kjøres bør avvikles formelt.',
+    references: [
+      {
+        source: 'Intern livssyklus-policy',
+        control: 'AK-POL-002',
+        appliesWhen: 'Aktive registerposter',
+        version: 'v1.0',
+      },
+      {
+        source: 'ISO/IEC 27001',
+        control: 'A.5.9 – Inventar av informasjon og andre eiendeler',
+        appliesWhen: 'Alltid',
+        version: 'ISO/IEC 27001:2022',
+      },
+    ],
   },
   {
     id: 'AK-R3',
@@ -33,6 +67,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'high',
     rationale:
       'Uten eierskap er det uklart hvem som svarer for endringer, hendelser og risiko.',
+    references: [
+      {
+        source: 'Intern eierskapspolicy',
+        control: 'AK-POL-003',
+        appliesWhen: 'Alle aktive agenter',
+        version: 'v1.0',
+      },
+      {
+        source: 'NIST AI RMF',
+        control: 'GOVERN 2.1 – Roller og ansvar',
+        appliesWhen: 'Ved etablert AI-styring',
+        version: 'AI RMF 1.0 (jan. 2023)',
+      },
+      {
+        source: 'ISO/IEC 27001',
+        control: 'A.5.9 – Eierskap til eiendeler',
+        appliesWhen: 'Alltid',
+        version: 'ISO/IEC 27001:2022',
+      },
+    ],
   },
   {
     id: 'AK-R4',
@@ -42,6 +96,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'critical',
     rationale:
       'Agenter som kan endre data eller kjøre kode uten menneskelig godkjenning kan forårsake alvorlig skade.',
+    references: [
+      {
+        source: 'Intern sikkerhetspolicy',
+        control: 'AK-POL-004',
+        appliesWhen: 'Alle produksjonsagenter',
+        version: 'v1.0',
+      },
+      {
+        source: 'EU AI Act',
+        control: 'Art. 14 – Menneskelig tilsyn',
+        appliesWhen: 'Bare ved høyrisikosystemer',
+        version: 'Forordning (EU) 2024/1689',
+      },
+      {
+        source: 'NIST AI RMF',
+        control: 'MEASURE 2.3 – Human-AI-konfigurasjon',
+        appliesWhen: 'Ved etablert AI-styring',
+        version: 'AI RMF 1.0 (jan. 2023)',
+      },
+    ],
   },
   {
     id: 'AK-R5',
@@ -51,6 +125,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'high',
     rationale:
       'Ukjente MCP-servere kan gi datalekkasje, uautorisert kodekjøring eller kompromittert leverandørkjede.',
+    references: [
+      {
+        source: 'OWASP Top 10 for LLM Applications',
+        control: 'LLM03 – Supply-Chain Vulnerabilities',
+        appliesWhen: 'Ved bruk av eksterne MCP-servere',
+        version: '2025',
+      },
+      {
+        source: 'CSA – Cloud Security Alliance',
+        control: 'AI Security Working Group – veiledning for LLM-integrasjoner',
+        appliesWhen: 'Ved tredjepartsintegrasjoner',
+        version: '2024',
+      },
+      {
+        source: 'Intern integrasjonspolicy',
+        control: 'AK-POL-005',
+        appliesWhen: 'Alle MCP-tilkoblinger',
+        version: 'v1.0',
+      },
+    ],
   },
   {
     id: 'AK-R6',
@@ -60,6 +154,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'medium',
     rationale:
       'Regelmessig gjennomgang er nødvendig for å oppdage endringer i risikobilde og bruk.',
+    references: [
+      {
+        source: 'Intern risikopolicy',
+        control: 'AK-POL-006',
+        appliesWhen: 'Aktive produksjonsagenter',
+        version: 'v1.0',
+      },
+      {
+        source: 'EU AI Act',
+        control: 'Art. 9 – Risikohåndteringssystem',
+        appliesWhen: 'Bare ved høyrisikosystemer',
+        version: 'Forordning (EU) 2024/1689',
+      },
+      {
+        source: 'ISO/IEC 42001',
+        control: '8.4 – AI-risikovurdering',
+        appliesWhen: 'Ved etablert AI-styringssystem',
+        version: 'ISO/IEC 42001:2023',
+      },
+    ],
   },
   {
     id: 'AK-R7',
@@ -69,6 +183,20 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'medium',
     rationale:
       'Motstrid indikerer at enten registeret er utdatert eller implementasjonen har drevet fra godkjent design.',
+    references: [
+      {
+        source: 'Intern change management-policy',
+        control: 'AK-POL-007',
+        appliesWhen: 'Alle deklarerte agenter',
+        version: 'v1.0',
+      },
+      {
+        source: 'NIST AI RMF',
+        control: 'MANAGE 4.1 – Overvåking etter idriftsettelse',
+        appliesWhen: 'Ved etablert AI-styring',
+        version: 'AI RMF 1.0 (jan. 2023)',
+      },
+    ],
   },
   {
     id: 'AK-R8',
@@ -78,6 +206,26 @@ export const CONTROL_RULES: ControlRule[] = [
     defaultSeverity: 'high',
     rationale:
       'Uten logging kan agenten ikke revideres, feilsøkes eller etterforskes ved sikkerhetshendelser.',
+    references: [
+      {
+        source: 'Intern loggpolicy',
+        control: 'AK-POL-008',
+        appliesWhen: 'Alle produksjonsagenter',
+        version: 'v1.0',
+      },
+      {
+        source: 'EU AI Act',
+        control: 'Art. 12 – Journalføring',
+        appliesWhen: 'Bare ved høyrisikosystemer',
+        version: 'Forordning (EU) 2024/1689',
+      },
+      {
+        source: 'ISO/IEC 27001',
+        control: 'A.8.15 – Logging',
+        appliesWhen: 'Alltid',
+        version: 'ISO/IEC 27001:2022',
+      },
+    ],
   },
 ];
 
