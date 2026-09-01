@@ -12,10 +12,17 @@ import {
   toolPermissionLabel,
 } from '../utils/labels.ts';
 import {
+  AUTONOMY_LABEL,
+  DATA_LABEL,
+  EVIDENCE_KIND_LABEL,
+  REACH_LABEL,
   REGISTRATION_LABEL,
   REGISTRATION_TONE,
+  REVERSIBILITY_LABEL,
+  RIGHTS_LABEL,
   RISK_LEVEL_LABEL,
   RISK_LEVEL_TONE,
+  fieldLabel,
 } from '../utils/riskLabels.ts';
 import type { Evidence, ReconciledAgent, RegistrationCriteria } from '../domain/types.ts';
 
@@ -242,27 +249,30 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
           {(
             [
-              { key: 'rights', label: 'Rettigheter' },
-              { key: 'data', label: 'Data' },
-              { key: 'autonomy', label: 'Autonomi' },
-              { key: 'reach', label: 'Rekkevidde' },
-              { key: 'reversibility', label: 'Reversibilitet' },
+              { key: 'rights', label: 'Rettigheter', map: RIGHTS_LABEL },
+              { key: 'data', label: 'Data', map: DATA_LABEL },
+              { key: 'autonomy', label: 'Autonomi', map: AUTONOMY_LABEL },
+              { key: 'reach', label: 'Rekkevidde', map: REACH_LABEL },
+              { key: 'reversibility', label: 'Reversibilitet', map: REVERSIBILITY_LABEL },
             ] as const
-          ).map((d) => (
-            <div
-              key={d.key}
-              className={`rounded-md border p-2 ${
-                agent.risk.driverDimension === d.key
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-slate-200 bg-slate-50'
-              }`}
-            >
-              <div className="text-slate-500">{d.label}</div>
-              <div className="mt-0.5 font-medium text-slate-900">
-                {agent.risk.dimensions[d.key]}
+          ).map((d) => {
+            const value = agent.risk.dimensions[d.key];
+            const label =
+              (d.map as Record<string, string>)[value as string] ?? String(value);
+            return (
+              <div
+                key={d.key}
+                className={`rounded-md border p-2 ${
+                  agent.risk.driverDimension === d.key
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-200 bg-slate-50'
+                }`}
+              >
+                <div className="text-slate-500">{d.label}</div>
+                <div className="mt-0.5 font-medium text-slate-900">{label}</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="mt-3">
           <div className="text-xs uppercase text-slate-500">Dempende kontroller</div>
@@ -581,20 +591,28 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
           <p className="mt-2 text-sm text-slate-500">Ingen ekstra evidens registrert.</p>
         ) : (
           <ol className="mt-3 space-y-2 text-sm">
-            {agent.evidence.map((e, i) => (
-              <li key={`${e.field ?? 'field'}-${i}`} className="flex gap-2">
-                {evidenceIcon(e.kind)}
-                <div>
-                  <span className="font-medium text-slate-900">{e.field ?? e.kind}</span>{' '}
-                  <span className="text-slate-500">
-                    ({e.kind}
-                    {e.sourceId ? `, ${e.sourceId}` : ''}
-                    {e.observedAt ? `, ${formatDateNb(e.observedAt)}` : ''})
-                  </span>
-                  {e.note ? <div className="text-slate-700">{e.note}</div> : null}
-                </div>
-              </li>
-            ))}
+            {agent.evidence.map((e, i) => {
+              const humanField = fieldLabel(e.field) || EVIDENCE_KIND_LABEL[e.kind];
+              return (
+                <li key={`${e.field ?? 'field'}-${i}`} className="flex gap-2">
+                  {evidenceIcon(e.kind)}
+                  <div>
+                    <span className="font-medium text-slate-900">{humanField}</span>{' '}
+                    <span className="text-slate-500">
+                      ({EVIDENCE_KIND_LABEL[e.kind]}
+                      {e.sourceId ? `, ${e.sourceId}` : ''}
+                      {e.observedAt ? `, ${formatDateNb(e.observedAt)}` : ''})
+                    </span>
+                    {e.field ? (
+                      <span className="ml-1 font-mono text-xs text-slate-400">
+                        [{e.field}]
+                      </span>
+                    ) : null}
+                    {e.note ? <div className="text-slate-700">{e.note}</div> : null}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         )}
       </section>

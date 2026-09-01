@@ -104,7 +104,7 @@ function deriveDataSensitivity(
   if (norm.some((c) => SPECIAL_KEYWORDS.some((k) => c.includes(k)))) return 'special_category';
   if (norm.some((c) => PERSONAL_KEYWORDS.some((k) => c.includes(k)))) return 'personal';
   if (norm.some((c) => c.includes('intern') || c.includes('faktura') || c.includes('salg') || c.includes('supp') || c.includes('drift') || c.includes('kildekode'))) return 'internal';
-  if (norm.some((c) => c.includes('åpne') || c.includes('offentlig'))) return 'open';
+  if (norm.some((c) => c.includes('åpne') || c.includes('offentlig') || c.includes('synt') || c.includes('test'))) return 'open';
   if (declared || observed.length > 0) return 'internal';
   return 'unknown';
 }

@@ -4,7 +4,7 @@ import { Search, X } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge } from '../components/StatusBadge.tsx';
 import { STATUS_LABEL, overallStatus } from '../domain/status.ts';
-import type { OverallAgentStatus, Severity } from '../domain/types.ts';
+import type { MatchStatus, OverallAgentStatus } from '../domain/types.ts';
 import { formatDateShortNb } from '../utils/format.ts';
 import { approvalLabel, envLabel } from '../utils/labels.ts';
 import {
@@ -14,23 +14,7 @@ import {
   RISK_LEVEL_TONE,
 } from '../utils/riskLabels.ts';
 
-const STATUS_ORDER: OverallAgentStatus[] = [
-  'critical',
-  'needs_review',
-  'observed_only',
-  'declared_only',
-  'ok',
-];
-
-const SEVERITY_OPTIONS: Array<{ value: Severity | 'all'; label: string }> = [
-  { value: 'all', label: 'Alle alvorlighetsgrader' },
-  { value: 'critical', label: 'Kritisk' },
-  { value: 'high', label: 'Høy' },
-  { value: 'medium', label: 'Middels' },
-  { value: 'low', label: 'Lav' },
-];
-
-function statusTone(status: OverallAgentStatus) {
+function overallStatusTone(status: OverallAgentStatus) {
   switch (status) {
     case 'critical':
       return 'critical' as const;
@@ -46,19 +30,21 @@ function statusTone(status: OverallAgentStatus) {
 }
 
 type Scope = 'all' | 'registered' | 'observed' | 'shadow';
+type RegisterFilter = 'all' | 'matched' | 'drift' | 'declaration_only' | 'observation_only';
+type ControlFilter = 'all' | 'critical' | 'needs_review' | 'none';
 
 function scopeFromUrl(v: string | null): Scope {
   return v === 'registered' || v === 'observed' || v === 'shadow' ? v : 'all';
 }
 
-function statusFromUrl(v: string | null): 'all' | OverallAgentStatus {
-  const allowed: OverallAgentStatus[] = ['critical', 'needs_review', 'observed_only', 'declared_only', 'ok'];
-  return allowed.includes(v as OverallAgentStatus) ? (v as OverallAgentStatus) : 'all';
+function registerFromUrl(v: string | null): RegisterFilter {
+  const allowed: RegisterFilter[] = ['matched', 'drift', 'declaration_only', 'observation_only'];
+  return allowed.includes(v as RegisterFilter) ? (v as RegisterFilter) : 'all';
 }
 
-function severityFromUrl(v: string | null): 'all' | Severity {
-  const allowed: Severity[] = ['critical', 'high', 'medium', 'low'];
-  return allowed.includes(v as Severity) ? (v as Severity) : 'all';
+function controlFromUrl(v: string | null): ControlFilter {
+  const allowed: ControlFilter[] = ['critical', 'needs_review', 'none'];
+  return allowed.includes(v as ControlFilter) ? (v as ControlFilter) : 'all';
 }
 
 function envFromUrl(v: string | null): 'all' | 'production' | 'test' | 'development' {
@@ -72,14 +58,34 @@ const SCOPE_LABEL: Record<Scope, string> = {
   shadow: 'Skyggeagenter (kun observert)',
 };
 
+const REGISTER_LABEL: Record<RegisterFilter, string> = {
+  all: 'Alle registerstatuser',
+  matched: 'Registrert og observert',
+  drift: 'Observert med avvik',
+  declaration_only: 'Registrert, ikke observert',
+  observation_only: 'Observert, ikke registrert',
+};
+
+const CONTROL_LABEL: Record<ControlFilter, string> = {
+  all: 'Alle kontrollstatuser',
+  critical: 'Kritiske funn',
+  needs_review: 'Må vurderes',
+  none: 'Ingen aktive kontrollfunn',
+};
+
+function matchStatusToRegister(m: MatchStatus): RegisterFilter {
+  if (m === 'ambiguous') return 'observation_only';
+  return m;
+}
+
 export function AgentsPage() {
   const { reconciled, findings, sources } = useAgentkart();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const environment = envFromUrl(searchParams.get('environment'));
-  const statusFilter = statusFromUrl(searchParams.get('status'));
-  const severityFilter = severityFromUrl(searchParams.get('severity'));
+  const registerFilter = registerFromUrl(searchParams.get('register'));
+  const controlFilter = controlFromUrl(searchParams.get('control'));
   const scopeFilter = scopeFromUrl(searchParams.get('scope'));
 
   const [query, setQuery] = useState('');
@@ -131,7 +137,13 @@ export function AgentsPage() {
         const approval = approvalLabel(agent.declared?.approvalStatus);
         const lastReviewed = agent.declared?.lastReviewedAt ?? null;
         const agentFindings = findings.filter((f) => f.agentId === agent.id);
-        const worst: Severity | undefined = agentFindings[0]?.severity;
+        const hasCritical = agentFindings.some((f) => f.severity === 'critical');
+        const controlStatus: ControlFilter =
+          hasCritical
+            ? 'critical'
+            : agentFindings.length > 0
+              ? 'needs_review'
+              : 'none';
         return {
           agent,
           status,
@@ -142,7 +154,8 @@ export function AgentsPage() {
           write,
           approval,
           lastReviewed,
-          worst,
+          controlStatus,
+          registerStatus: matchStatusToRegister(agent.matchStatus),
         };
       })
       .filter((row) => {
@@ -150,8 +163,8 @@ export function AgentsPage() {
         if (scopeFilter === 'observed' && row.agent.observations.length === 0) return false;
         if (scopeFilter === 'shadow' && row.agent.matchStatus !== 'observation_only') return false;
         if (environment !== 'all' && row.env !== environment) return false;
-        if (statusFilter !== 'all' && row.status !== statusFilter) return false;
-        if (severityFilter !== 'all' && row.worst !== severityFilter) return false;
+        if (registerFilter !== 'all' && row.registerStatus !== registerFilter) return false;
+        if (controlFilter !== 'all' && row.controlStatus !== controlFilter) return false;
         if (sourceFilter !== 'all' && !row.sourceIds.includes(sourceFilter)) return false;
         if (frameworkFilter !== 'all' && row.framework !== frameworkFilter) return false;
         if (q) {
@@ -162,8 +175,9 @@ export function AgentsPage() {
       })
       .sort((a, b) => {
         if (sortKey === 'status') {
-          const sa = STATUS_ORDER.indexOf(a.status);
-          const sb = STATUS_ORDER.indexOf(b.status);
+          const order = ['critical', 'needs_review', 'observed_only', 'declared_only', 'ok'] as const;
+          const sa = order.indexOf(a.status as (typeof order)[number]);
+          const sb = order.indexOf(b.status as (typeof order)[number]);
           if (sa !== sb) return sa - sb;
           return a.agent.displayName.localeCompare(b.agent.displayName, 'nb');
         }
@@ -175,13 +189,13 @@ export function AgentsPage() {
         }
         return a.agent.displayName.localeCompare(b.agent.displayName, 'nb');
       });
-  }, [reconciled, findings, query, environment, statusFilter, severityFilter, scopeFilter, sourceFilter, frameworkFilter, sortKey]);
+  }, [reconciled, findings, query, environment, registerFilter, controlFilter, scopeFilter, sourceFilter, frameworkFilter, sortKey]);
 
   const clearFilters = () => {
     setQuery('');
     setSourceFilter('all');
     setFrameworkFilter('all');
-    updateUrl({ environment: null, status: null, severity: null, scope: null });
+    updateUrl({ environment: null, register: null, control: null, scope: null });
   };
 
   return (
@@ -243,35 +257,34 @@ export function AgentsPage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-slate-700">Status</span>
+            <span className="text-sm font-medium text-slate-700">Registerstatus</span>
             <select
-              value={statusFilter}
+              value={registerFilter}
               onChange={(e) => {
-                updateUrl({ status: e.target.value });
+                updateUrl({ register: e.target.value });
               }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
-              <option value="all">Alle statuser</option>
-              {STATUS_ORDER.map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABEL[s]}
+              {(Object.keys(REGISTER_LABEL) as RegisterFilter[]).map((v) => (
+                <option key={v} value={v}>
+                  {REGISTER_LABEL[v]}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-slate-700">Alvorlighetsgrad</span>
+            <span className="text-sm font-medium text-slate-700">Kontrollstatus</span>
             <select
-              value={severityFilter}
+              value={controlFilter}
               onChange={(e) => {
-                updateUrl({ severity: e.target.value });
+                updateUrl({ control: e.target.value });
               }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
-              {SEVERITY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
+              {(Object.keys(CONTROL_LABEL) as ControlFilter[]).map((v) => (
+                <option key={v} value={v}>
+                  {CONTROL_LABEL[v]}
                 </option>
               ))}
             </select>
@@ -402,7 +415,7 @@ export function AgentsPage() {
                       {formatDateShortNb(row.lastReviewed)}
                     </td>
                     <td className="px-3 py-2">
-                      <Badge tone={statusTone(row.status)}>{STATUS_LABEL[row.status]}</Badge>
+                      <Badge tone={overallStatusTone(row.status)}>{STATUS_LABEL[row.status]}</Badge>
                     </td>
                   </tr>
                 ))

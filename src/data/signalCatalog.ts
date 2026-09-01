@@ -45,7 +45,7 @@ export const SIGNAL_CATALOG: SignalCatalogEntry[] = [
   },
   {
     type: 'repo_scan',
-    label: 'Repo-scan etter SDK-avhengigheter og nøkler',
+    label: 'Kodeskann etter SDK-er, konfigurasjon og nøkkelreferanser',
     proves: 'Agenter under utvikling.',
     weakness: 'Fanger ikke det som faktisk kjører.',
   },

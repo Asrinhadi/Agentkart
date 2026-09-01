@@ -212,7 +212,7 @@ export function OverviewPage() {
             hint="Observert uten treff i registeret."
             icon={AlertTriangle}
             accent="amber"
-            to="/agents?status=observed_only"
+            to="/agents?register=observation_only"
             linkLabel="Åpne skyggeagenter i agentinventaret"
           />
           <KpiCard

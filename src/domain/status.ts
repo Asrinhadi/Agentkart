@@ -46,7 +46,7 @@ export function worstSeverity(list: readonly Severity[]): Severity | null {
 }
 
 export const STATUS_LABEL: Record<OverallAgentStatus, string> = {
-  ok: 'I orden',
+  ok: 'Ingen aktive kontrollfunn',
   needs_review: 'Må vurderes',
   critical: 'Kritisk',
   declared_only: 'Bare registrert',

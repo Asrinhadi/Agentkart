@@ -332,6 +332,13 @@ export function reconcile(
   return { agents };
 }
 
+function pluralSignal(n: number): string {
+  return n === 1 ? 'ett signal' : `${n} signaler`;
+}
+function pluralSource(n: number): string {
+  return n === 1 ? 'én datakilde' : `${n} datakilder`;
+}
+
 function buildCorrelation(
   observations: readonly ObservedAgent[],
   matchStatus: MatchStatus,
@@ -339,19 +346,37 @@ function buildCorrelation(
   const signalCount = observations.length;
   const sourceCount = new Set(observations.map((o) => o.sourceId)).size;
   if (signalCount === 0) {
-    return { signalCount: 0, sourceCount: 0, text: 'Ingen tekniske observasjoner å korrelere.' };
+    return {
+      signalCount: 0,
+      sourceCount: 0,
+      text: 'Ingen tekniske observasjoner å korrelere.',
+    };
+  }
+  const signals = pluralSignal(signalCount);
+  const sources = pluralSource(sourceCount);
+  if (matchStatus === 'observation_only') {
+    return {
+      signalCount,
+      sourceCount,
+      text: `${signals[0]!.toUpperCase() + signals.slice(1)} fra ${sources}. Ingen kobling til godkjent register ble funnet.`,
+    };
+  }
+  if (matchStatus === 'ambiguous') {
+    return {
+      signalCount,
+      sourceCount,
+      text: `${signals[0]!.toUpperCase() + signals.slice(1)} fra ${sources}. Flere mulige treff i registeret – må bekreftes manuelt.`,
+    };
   }
   const strength =
     matchStatus === 'matched'
       ? 'bekreftet mot register'
       : matchStatus === 'drift'
         ? 'bekreftet mot register, men med observerte avvik'
-        : matchStatus === 'ambiguous'
-          ? 'flere mulige treff – må bekreftes manuelt'
-          : 'sannsynlig samme agent';
+        : 'sannsynlig samme agent';
   return {
     signalCount,
     sourceCount,
-    text: `Satt sammen fra ${signalCount} signal(er) i ${sourceCount} kilde(r) – ${strength}.`,
+    text: `Satt sammen fra ${signals} i ${sources} – ${strength}.`,
   };
 }

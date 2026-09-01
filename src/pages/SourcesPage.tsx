@@ -188,7 +188,7 @@ export function SourcesPage() {
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th scope="col" className="px-3 py-2">Signal</th>
-                <th scope="col" className="px-3 py-2">Beviser</th>
+                <th scope="col" className="px-3 py-2">Indikerer</th>
                 <th scope="col" className="px-3 py-2">Svakhet</th>
               </tr>
             </thead>
