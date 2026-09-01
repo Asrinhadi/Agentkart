@@ -10,12 +10,16 @@ Agentkart er en konseptdemo for styring og sikkerhetsoppfølging av KI-agenter. 
 
 ## Hovedfunksjoner
 
-- Avstemming mellom godkjente og observerte KI-agenter
-- Åtte kontrollregler for styring, sikkerhet og etterlevelse
-- Prioriterte funn med alvorlighetsgrad, datagrunnlag og anbefalte tiltak
+- Avstemming i fire tilstander: registrert + observert, observert med avvik, registrert ikke observert, og skyggeagent
+- Klassifisering av hver agent som **Verktøy · Automasjon · Agent** basert på fire ja/nei-kriterier
+- Ordinal risikovurdering – fem dimensjoner (rettigheter, data, autonomi, rekkevidde, reversibilitet), ingen gjennomsnitt, «Ukjent» som eget nivå
+- Åtte kontrollregler (AK-R1…AK-R8) med kildehenvisning til interne policyer, EU AI Act, NIST AI RMF, ISO/IEC 27001/42001 og OWASP LLM Top 10
+- Signalkatalog og eksplisitt dekning (%) per datakilde
+- Prioriterte funn med evidens, kilde og anbefalt tiltak
+- Bokmerkbare URL-drevne filtre for registerstatus, kontrollstatus, miljø og datakilde
 - Lokal JSON-import med streng Zod-validering
-- Filtrering av agenter og avvik
-- Styringsrapport som kan skrives ut eller lagres som PDF
+- Utskriftsvennlig styringsrapport («Lagre som PDF»)
+- Sikkerhetsherdet: streng CSP, ingen backend, ingen persistens
 
 ## Teknologi
 
