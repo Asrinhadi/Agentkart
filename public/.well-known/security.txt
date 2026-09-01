@@ -1,0 +1,5 @@
+Contact: https://github.com/Asrinhadi/Agentkart/issues
+Expires: 2027-09-01T00:00:00.000Z
+Preferred-Languages: nb, en
+Canonical: https://agentkart-one.vercel.app/.well-known/security.txt
+Policy: https://github.com/Asrinhadi/Agentkart/blob/main/SECURITY.md
