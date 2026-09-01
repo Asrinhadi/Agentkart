@@ -256,16 +256,22 @@ const LEVEL_LABEL: Record<RiskLevel, string> = {
   critical: 'Kritisk',
 };
 
+function capitalize(s: string): string {
+  if (s.length === 0) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function buildHeadline(level: RiskLevel, dims: RiskDimensions, mitigations: Mitigation[], lowered: boolean): string {
   const parts: string[] = [];
   parts.push(`${DATA_LABEL[dims.data]} med ${RIGHTS_LABEL[dims.rights]}`);
   parts.push(`${AUTONOMY_LABEL[dims.autonomy]}, ${REACH_LABEL[dims.reach]}`);
   parts.push(REV_LABEL[dims.reversibility]);
+  const sentences = [parts[0], ...parts.slice(1).map(capitalize)].join('. ');
   const present = mitigations.filter((m) => m.present).map((m) => m.label.toLowerCase());
   const damper = present.length > 0
     ? ` Demper: ${present.join(', ')}${lowered ? ' (senket ett hakk)' : ''}.`
     : ' Ingen dokumenterte dempende kontroller.';
-  return `${LEVEL_LABEL[level]} — ${parts.join('. ')}.${damper}`;
+  return `${LEVEL_LABEL[level]} — ${sentences}.${damper}`;
 }
 
 export function assessRisk(

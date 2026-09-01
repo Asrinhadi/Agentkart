@@ -179,7 +179,7 @@ export function SourcesPage() {
           Signalkatalog
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Hva slags signaler kan brukes til å oppdage KI-agenter, hva beviser hvert av dem, og
+          Hva slags signaler kan brukes til å oppdage KI-agenter, hva hvert signal kan indikere, og
           hvor svake er de? Katalogen er statisk og forklarer «hvorfor stoler vi på dette?»
           bak hver observasjon.
         </p>

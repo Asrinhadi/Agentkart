@@ -418,9 +418,14 @@ export function ruleUncontrolledWrite(agent: ReconciledAgent, now: Date): Findin
   if (!declared) {
     explanationParts.push('Ingen deklarasjon i registeret dokumenterer godkjenning.');
   } else if (declared.approvalStatus !== 'approved') {
-    explanationParts.push(
-      `Godkjenningsstatus i registeret er «${declared.approvalStatus}».`,
-    );
+    const approvalTextMap: Record<string, string> = {
+      not_required: 'Ikke påkrevd',
+      pending: 'Avventer',
+      approved: 'Godkjent',
+      rejected: 'Avvist',
+    };
+    const label = approvalTextMap[declared.approvalStatus] ?? declared.approvalStatus;
+    explanationParts.push(`Godkjenningsstatus i registeret er «${label}».`);
   }
 
   return makeFinding({
