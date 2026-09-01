@@ -31,10 +31,30 @@ Ingen backend. Ingen database. Ingen nettverkskall. Alt kjører i nettleseren.
 
 ## Hva den viser
 
-- **8 kontrollregler (AK-R1…AK-R8):** skyggeagenter, manglende eier, ukontrollert skrivetilgang, uverifiserte MCP-servere, utdatert vurdering, motstridende metadata, manglende logging.
+- **8 kontrollregler (AK-R1…AK-R8):** skyggeagenter, ikke observert nylig, manglende eier, ukontrollert skrivetilgang, uverifiserte MCP-servere, utdatert vurdering, motstridende metadata, manglende logging.
 - **Reconciliation-motor** som matcher deklarert mot observert *deterministisk* (ingen fuzzy-sammenslåing).
 - **Seks ruter:** oversikt, agentinventar, agentdetaljer, avvik, datakilder, kontrollregler.
 - **Lokal JSON-import** (register + observasjoner) med streng Zod-validering.
+
+---
+
+## Hvordan fungerer appen
+
+Agentkart sammenligner **to bilder** av samme virkelighet og synliggjør gapet:
+
+1. **Kilder inn.** Appen starter med innebygde demodata og lar deg importere to typer JSON lokalt i nettleseren:
+   - *godkjent register* — hva virksomheten mener den har,
+   - *tekniske observasjoner* — hva datakildene faktisk ser.
+2. **Validering.** Hver fil kontrolleres av et strengt Zod-skjema (`.strict()`, 1 MB, maks 500 poster, ISO 8601-datoer, ukjente felter avvises). Ved feil vises en norsk melding — ingen stack trace, ingenting sendes ut av nettleseren.
+3. **Reconciliation.** En ren funksjon i `src/domain/reconcile.ts` matcher deklarerte og observerte agenter i tre deterministiske trinn:
+   1. eksakt `agentKey`,
+   2. eksakt normalisert `repositoryUrl` + `entryPoint`,
+   3. entydig normalisert `name` + `environment`.
+   Tvetydige treff slås **ikke** sammen — de merkes «Må bekreftes».
+4. **Kontrollregler.** Åtte rene funksjoner i `src/domain/rules.ts` (AK-R1…AK-R8) evalueres per avstemte agent med en injisert `now`-dato (deterministisk testing). Hver regel returnerer ett `Finding` med alvorlighetsgrad, forklaring, anbefalt tiltak og evidens.
+5. **Grensesnitt.** React Router serverer seks sider (`/`, `/agents`, `/agents/:id`, `/findings`, `/sources`, `/rules`). All UI-tilstand ligger i React-state via `AgentkartContext` — ingen persistens; reload eller «Tilbakestill demo» gjenoppretter demodataene.
+
+Kort sagt: **importer → valider → avstem → evaluer regler → vis funn med provenance**. Alt lokalt, deterministisk og sporbart.
 
 ---
 
