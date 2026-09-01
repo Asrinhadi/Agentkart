@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { FileDown } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { SeverityBadge } from '../components/StatusBadge.tsx';
 import { CONTROL_RULES } from '../domain/rules.ts';
@@ -58,12 +59,21 @@ export function FindingsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold text-slate-900">Avvik</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Alle avvik som er avledet fra kontrollreglene mot avstemte agenter, sortert etter
-          alvorlighetsgrad.
-        </p>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Avvik</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Alle avvik som er avledet fra kontrollreglene mot avstemte agenter, sortert etter
+            alvorlighetsgrad.
+          </p>
+        </div>
+        <Link
+          to="/report"
+          className="inline-flex items-center gap-2 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          <FileDown className="h-4 w-4" aria-hidden="true" />
+          Eksporter styringsrapport
+        </Link>
       </header>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">

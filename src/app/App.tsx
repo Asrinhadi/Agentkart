@@ -6,6 +6,7 @@ import { AgentDetailPage } from '../pages/AgentDetailPage.tsx';
 import { FindingsPage } from '../pages/FindingsPage.tsx';
 import { SourcesPage } from '../pages/SourcesPage.tsx';
 import { RulesPage } from '../pages/RulesPage.tsx';
+import { ReportPage } from '../pages/ReportPage.tsx';
 import { NotFoundPage } from '../pages/NotFoundPage.tsx';
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
         <Route path="findings" element={<FindingsPage />} />
         <Route path="sources" element={<SourcesPage />} />
         <Route path="rules" element={<RulesPage />} />
+        <Route path="report" element={<ReportPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

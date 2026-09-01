@@ -31,3 +31,21 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+@media print {
+  html,
+  body,
+  #root {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
+

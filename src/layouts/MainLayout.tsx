@@ -65,7 +65,7 @@ export function MainLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-800 bg-slate-900 text-white">
+      <header className="border-b border-slate-800 bg-slate-900 text-white print:hidden">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -102,8 +102,8 @@ export function MainLayout() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1440px] gap-6 px-4 py-6 sm:px-6">
-        <aside className="hidden w-56 shrink-0 md:block">
+      <div className="mx-auto flex max-w-[1440px] gap-6 px-4 py-6 sm:px-6 print:max-w-none print:gap-0 print:px-0 print:py-0">
+        <aside className="hidden w-56 shrink-0 md:block print:hidden">
           <div className="sticky top-6 rounded-lg bg-slate-900 p-3 text-white shadow">
             <NavLinks />
           </div>
@@ -111,7 +111,7 @@ export function MainLayout() {
 
         <main className="min-w-0 flex-1">
           <Outlet />
-          <footer className="mt-12 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <footer className="mt-12 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <p>
               Konseptdemo – funnene er basert på importerte observasjoner, ikke en aktiv
               nettverksskanning. Ingen data sendes ut av nettleseren.
