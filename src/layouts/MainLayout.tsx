@@ -111,10 +111,22 @@ export function MainLayout() {
 
         <main className="min-w-0 flex-1">
           <Outlet />
-          <footer className="mt-12 border-t border-slate-200 pt-6 text-xs text-slate-500">
+          <footer className="mt-12 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
             <p>
               Konseptdemo – funnene er basert på importerte observasjoner, ikke en aktiv
               nettverksskanning. Ingen data sendes ut av nettleseren.
+            </p>
+            <p>
+              Utviklet av{' '}
+              <span className="font-medium text-slate-700">Asrin Hadi</span> ·{' '}
+              <a
+                href="https://github.com/Asrinhadi/Agentkart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-700 hover:underline"
+              >
+                GitHub
+              </a>
             </p>
           </footer>
         </main>

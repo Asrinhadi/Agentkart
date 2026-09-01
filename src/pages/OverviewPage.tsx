@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Database, PlayCircle, ShieldAlert, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, Database, ExternalLink, PlayCircle, Rocket, ShieldAlert, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
@@ -348,6 +348,89 @@ export function OverviewPage() {
             Se datakilder
           </Link>
         </div>
+      </section>
+
+      <section
+        aria-labelledby="about-heading"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
+        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+          <h2 id="about-heading" className="text-xl font-semibold text-slate-900">
+            Om demoen
+          </h2>
+
+          <p className="mt-3 text-sm text-slate-700">
+            <span className="font-semibold text-slate-900">Problemet:</span>{' '}
+            Virksomheter tar i bruk stadig flere autonome KI-agenter, men registeret og
+            virkeligheten er sjelden i takt. Skyggeagenter, ukontrollert skrivetilgang og
+            manglende logging oppdages ofte først når noe har gått galt.
+          </p>
+
+          <p className="mt-3 text-sm text-slate-700">
+            <span className="font-semibold text-slate-900">Min rolle:</span>{' '}
+            Jeg har designet og utviklet hele demoen selv: domenemodell, avstemmingsmotor,
+            åtte kontrollregler, JSON-import med streng validering, samt hele grensesnittet
+            i React og Tailwind. Sikkerhet er innebygd fra start – ingen data forlater
+            nettleseren.
+          </p>
+
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                Implementert i demoen
+              </h3>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                <li>· Avstemming mellom register og observasjoner</li>
+                <li>· Åtte kontrollregler (AK-R1 til AK-R8)</li>
+                <li>· Evidens per funn med provenance</li>
+                <li>· Sikker lokal JSON-import (Zod)</li>
+                <li>· Responsivt og tilgjengelig grensesnitt</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-sky-800">
+                <Rocket className="h-4 w-4" aria-hidden="true" />
+                Planlagt neste versjon
+              </h3>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                <li>· PostgreSQL og backend-API</li>
+                <li>· Autentisering og roller</li>
+                <li>· Funnhistorikk og godkjenningsflyt</li>
+                <li>· Automatiske datakoblinger</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <aside className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+            Utviklet av
+          </p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">Asrin Hadi</p>
+          <p className="mt-1 text-sm text-slate-600">
+            Bachelorstudent i informasjonssystemer
+          </p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {['React', 'TypeScript', 'Tailwind', 'Zod'].map((t) => (
+              <span
+                key={t}
+                className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+          <a
+            href="https://github.com/Asrinhadi/Agentkart"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100"
+          >
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            Kildekode på GitHub
+          </a>
+        </aside>
       </section>
     </div>
   );
