@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge } from '../components/StatusBadge.tsx';
@@ -39,17 +39,59 @@ function statusTone(status: OverallAgentStatus) {
   }
 }
 
+type Scope = 'all' | 'registered' | 'observed' | 'shadow';
+
+function scopeFromUrl(v: string | null): Scope {
+  return v === 'registered' || v === 'observed' || v === 'shadow' ? v : 'all';
+}
+
+function statusFromUrl(v: string | null): 'all' | OverallAgentStatus {
+  const allowed: OverallAgentStatus[] = ['critical', 'needs_review', 'observed_only', 'declared_only', 'ok'];
+  return allowed.includes(v as OverallAgentStatus) ? (v as OverallAgentStatus) : 'all';
+}
+
+function severityFromUrl(v: string | null): 'all' | Severity {
+  const allowed: Severity[] = ['critical', 'high', 'medium', 'low'];
+  return allowed.includes(v as Severity) ? (v as Severity) : 'all';
+}
+
+function envFromUrl(v: string | null): 'all' | 'production' | 'test' | 'development' {
+  return v === 'production' || v === 'test' || v === 'development' ? v : 'all';
+}
+
+const SCOPE_LABEL: Record<Scope, string> = {
+  all: 'Alle agenter',
+  registered: 'Registrerte agenter',
+  observed: 'Agenter med observasjoner',
+  shadow: 'Skyggeagenter (kun observert)',
+};
+
 export function AgentsPage() {
   const { reconciled, findings, sources } = useAgentkart();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const environment = envFromUrl(searchParams.get('environment'));
+  const statusFilter = statusFromUrl(searchParams.get('status'));
+  const severityFilter = severityFromUrl(searchParams.get('severity'));
+  const scopeFilter = scopeFromUrl(searchParams.get('scope'));
 
   const [query, setQuery] = useState('');
-  const [environment, setEnvironment] = useState<'all' | 'production' | 'test' | 'development'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | OverallAgentStatus>('all');
-  const [severityFilter, setSeverityFilter] = useState<'all' | Severity>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [frameworkFilter, setFrameworkFilter] = useState<string>('all');
   const [sortKey, setSortKey] = useState<'name' | 'status' | 'environment' | 'lastReviewed'>('status');
+
+  function updateUrl(patch: Record<string, string | null>) {
+    const next = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === null || value === '' || value === 'all') {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+    }
+    setSearchParams(next, { replace: true });
+  }
 
   const frameworks = useMemo(() => {
     const set = new Set<string>();
@@ -98,6 +140,9 @@ export function AgentsPage() {
         };
       })
       .filter((row) => {
+        if (scopeFilter === 'registered' && !row.agent.declared) return false;
+        if (scopeFilter === 'observed' && row.agent.observations.length === 0) return false;
+        if (scopeFilter === 'shadow' && row.agent.matchStatus !== 'observation_only') return false;
         if (environment !== 'all' && row.env !== environment) return false;
         if (statusFilter !== 'all' && row.status !== statusFilter) return false;
         if (severityFilter !== 'all' && row.worst !== severityFilter) return false;
@@ -124,15 +169,13 @@ export function AgentsPage() {
         }
         return a.agent.displayName.localeCompare(b.agent.displayName, 'nb');
       });
-  }, [reconciled, findings, query, environment, statusFilter, severityFilter, sourceFilter, frameworkFilter, sortKey]);
+  }, [reconciled, findings, query, environment, statusFilter, severityFilter, scopeFilter, sourceFilter, frameworkFilter, sortKey]);
 
   const clearFilters = () => {
     setQuery('');
-    setEnvironment('all');
-    setStatusFilter('all');
-    setSeverityFilter('all');
     setSourceFilter('all');
     setFrameworkFilter('all');
+    updateUrl({ environment: null, status: null, severity: null, scope: null });
   };
 
   return (
@@ -143,6 +186,22 @@ export function AgentsPage() {
           Alle avstemte agenter fra register og tekniske observasjoner. Klikk på en rad for
           detaljer.
         </p>
+        {scopeFilter !== 'all' ? (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-sky-100 py-1 pl-3 pr-1 text-sm text-sky-900 ring-1 ring-inset ring-sky-200">
+            <span className="font-medium">Filter fra oversikten:</span>
+            <span>{SCOPE_LABEL[scopeFilter]}</span>
+            <button
+              type="button"
+              onClick={() => {
+                updateUrl({ scope: null });
+              }}
+              aria-label="Fjern filter fra oversikten"
+              className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-sky-900 hover:bg-sky-200"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
       </header>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -165,7 +224,9 @@ export function AgentsPage() {
             <span className="text-sm font-medium text-slate-700">Miljø</span>
             <select
               value={environment}
-              onChange={(e) => setEnvironment(e.target.value as typeof environment)}
+              onChange={(e) => {
+                updateUrl({ environment: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle miljøer</option>
@@ -179,7 +240,9 @@ export function AgentsPage() {
             <span className="text-sm font-medium text-slate-700">Status</span>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+              onChange={(e) => {
+                updateUrl({ status: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle statuser</option>
@@ -195,7 +258,9 @@ export function AgentsPage() {
             <span className="text-sm font-medium text-slate-700">Alvorlighetsgrad</span>
             <select
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value as typeof severityFilter)}
+              onChange={(e) => {
+                updateUrl({ severity: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               {SEVERITY_OPTIONS.map((o) => (

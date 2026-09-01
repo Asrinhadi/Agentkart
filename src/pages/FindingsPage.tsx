@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { SeverityBadge } from '../components/StatusBadge.tsx';
 import { CONTROL_RULES } from '../domain/rules.ts';
@@ -14,13 +14,31 @@ const SEVERITIES: Array<{ value: Severity | 'all'; label: string }> = [
   { value: 'low', label: 'Lav' },
 ];
 
+function severityFromUrl(v: string | null): Severity | 'all' {
+  const allowed: Severity[] = ['critical', 'high', 'medium', 'low'];
+  return allowed.includes(v as Severity) ? (v as Severity) : 'all';
+}
+
 export function FindingsPage() {
   const { findings } = useAgentkart();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [severity, setSeverity] = useState<Severity | 'all'>('all');
-  const [environment, setEnvironment] = useState<'all' | string>('all');
-  const [rule, setRule] = useState<string>('all');
-  const [agent, setAgent] = useState<string>('all');
+  const severity = severityFromUrl(searchParams.get('severity'));
+  const environment = searchParams.get('environment') ?? 'all';
+  const rule = searchParams.get('rule') ?? 'all';
+  const agent = searchParams.get('agent') ?? 'all';
+
+  function updateUrl(patch: Record<string, string | null>) {
+    const next = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === null || value === '' || value === 'all') {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+    }
+    setSearchParams(next, { replace: true });
+  }
 
   const agents = useMemo(() => {
     const set = new Set<string>();
@@ -54,7 +72,9 @@ export function FindingsPage() {
             <span className="text-sm font-medium text-slate-700">Alvorlighetsgrad</span>
             <select
               value={severity}
-              onChange={(e) => setSeverity(e.target.value as Severity | 'all')}
+              onChange={(e) => {
+                updateUrl({ severity: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               {SEVERITIES.map((s) => (
@@ -68,7 +88,9 @@ export function FindingsPage() {
             <span className="text-sm font-medium text-slate-700">Miljø</span>
             <select
               value={environment}
-              onChange={(e) => setEnvironment(e.target.value)}
+              onChange={(e) => {
+                updateUrl({ environment: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle</option>
@@ -82,7 +104,9 @@ export function FindingsPage() {
             <span className="text-sm font-medium text-slate-700">Kontrollregel</span>
             <select
               value={rule}
-              onChange={(e) => setRule(e.target.value)}
+              onChange={(e) => {
+                updateUrl({ rule: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle</option>
@@ -97,7 +121,9 @@ export function FindingsPage() {
             <span className="text-sm font-medium text-slate-700">Agent</span>
             <select
               value={agent}
-              onChange={(e) => setAgent(e.target.value)}
+              onChange={(e) => {
+                updateUrl({ agent: e.target.value });
+              }}
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">Alle</option>

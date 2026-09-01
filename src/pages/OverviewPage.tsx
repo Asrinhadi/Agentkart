@@ -11,18 +11,22 @@ function KpiCard({
   hint,
   icon: Icon,
   accent,
+  to,
+  linkLabel,
 }: {
   label: string;
   value: number;
   hint: string;
   icon: typeof Users;
   accent: 'sky' | 'emerald' | 'amber' | 'red';
+  to: string;
+  linkLabel: string;
 }) {
   const border = {
-    sky: 'border-sky-200',
-    emerald: 'border-emerald-200',
-    amber: 'border-amber-200',
-    red: 'border-red-200',
+    sky: 'border-sky-200 hover:border-sky-400',
+    emerald: 'border-emerald-200 hover:border-emerald-400',
+    amber: 'border-amber-200 hover:border-amber-400',
+    red: 'border-red-200 hover:border-red-400',
   }[accent];
   const iconColor = {
     sky: 'text-sky-700',
@@ -31,14 +35,24 @@ function KpiCard({
     red: 'text-red-700',
   }[accent];
   return (
-    <div className={`rounded-lg border ${border} bg-white p-4 shadow-sm`}>
+    <Link
+      to={to}
+      aria-label={linkLabel}
+      className={`group block rounded-lg border ${border} bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2`}
+    >
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-slate-600">{label}</span>
         <Icon className={`h-5 w-5 ${iconColor}`} aria-hidden="true" />
       </div>
       <div className="mt-2 text-3xl font-semibold text-slate-900">{value}</div>
-      <p className="mt-1 text-xs text-slate-500">{hint}</p>
-    </div>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <p className="text-xs text-slate-500">{hint}</p>
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-sky-700 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+          Åpne
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -171,6 +185,8 @@ export function OverviewPage() {
             hint="Fra godkjent register."
             icon={Users}
             accent="sky"
+            to="/agents?scope=registered"
+            linkLabel="Åpne registrerte agenter i agentinventaret"
           />
           <KpiCard
             label="Observerte agenter"
@@ -178,6 +194,8 @@ export function OverviewPage() {
             hint="Har minst én teknisk observasjon."
             icon={Database}
             accent="emerald"
+            to="/agents?scope=observed"
+            linkLabel="Åpne observerte agenter i agentinventaret"
           />
           <KpiCard
             label="Skyggeagenter"
@@ -185,6 +203,8 @@ export function OverviewPage() {
             hint="Observert uten treff i registeret."
             icon={AlertTriangle}
             accent="amber"
+            to="/agents?status=observed_only"
+            linkLabel="Åpne skyggeagenter i agentinventaret"
           />
           <KpiCard
             label="Agenter med kritiske avvik"
@@ -192,6 +212,8 @@ export function OverviewPage() {
             hint="Har minst ett kritisk avvik."
             icon={ShieldAlert}
             accent="red"
+            to="/findings?severity=critical"
+            linkLabel="Åpne kritiske avvik"
           />
         </div>
       </section>
