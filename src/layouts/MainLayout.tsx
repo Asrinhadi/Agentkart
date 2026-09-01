@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import {
   AlertTriangle,
+  ChevronDown,
   Database,
   LayoutDashboard,
   ListChecks,
   Menu,
+  PlayCircle,
   RefreshCw,
-  Shield,
   Users,
   X,
 } from 'lucide-react';
@@ -59,6 +60,66 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+function DemoOptionsMenu({ onReset }: { onReset: () => void }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Demoalternativer
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-md border border-slate-200 bg-white text-slate-900 shadow-lg"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onReset();
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-slate-100"
+          >
+            <RefreshCw className="h-4 w-4 text-slate-500" aria-hidden="true" />
+            Tilbakestill demo
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function MainLayout() {
   const { reset } = useAgentkart();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,26 +139,22 @@ export function MainLayout() {
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-90">
               <span className="text-lg font-semibold tracking-tight">Agentkart</span>
               <span className="rounded bg-sky-700 px-2 py-0.5 text-xs font-medium">
                 Konseptdemo
               </span>
-            </div>
+            </Link>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden items-center gap-2 text-sm text-slate-300 sm:flex">
-              <Shield className="h-4 w-4" aria-hidden="true" />
-              <span>Data behandles lokalt</span>
-            </div>
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+          <div className="flex items-center gap-2">
+            <Link
+              to="/findings"
+              className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
             >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Tilbakestill demo
-            </button>
+              <PlayCircle className="h-4 w-4" aria-hidden="true" />
+              Start demo
+            </Link>
+            <DemoOptionsMenu onReset={reset} />
           </div>
         </div>
       </header>
@@ -113,19 +170,17 @@ export function MainLayout() {
           <Outlet />
           <footer className="mt-12 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <p>
-              Konseptdemo – funnene er basert på importerte observasjoner, ikke en aktiv
-              nettverksskanning. Ingen data sendes ut av nettleseren.
+              Utviklet av{' '}
+              <span className="font-medium text-slate-700">Asrin Hadi</span>
             </p>
             <p>
-              Utviklet av{' '}
-              <span className="font-medium text-slate-700">Asrin Hadi</span> ·{' '}
               <a
                 href="https://github.com/Asrinhadi/Agentkart"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sky-700 hover:underline"
               >
-                GitHub
+                Kildekode på GitHub
               </a>
             </p>
           </footer>

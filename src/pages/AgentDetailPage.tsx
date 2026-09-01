@@ -121,7 +121,9 @@ function ComparisonRow({
                 {rObs(o.value)}{' '}
                 <span className="text-xs text-slate-500">
                   ({o.sourceId}, {formatDateNb(o.observedAt)}
-                  {typeof o.confidence === 'number' ? `, confidence ${o.confidence.toFixed(2)}` : ''})
+                  {typeof o.confidence === 'number'
+                    ? `, treffsikkerhet ${Math.round(o.confidence * 100)} %`
+                    : ''})
                 </span>
               </li>
             ))}
@@ -258,7 +260,7 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-slate-500">Repository</dt>
+              <dt className="text-slate-500">Kodearkiv</dt>
               <dd className="text-right text-slate-900">
                 <SafeUrl value={declared?.repositoryUrl ?? first?.repositoryUrl} />
               </dd>

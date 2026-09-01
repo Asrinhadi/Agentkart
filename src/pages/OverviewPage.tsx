@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Database, ExternalLink, GitCompare, PlayCircle, Radar, Rocket, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Database, ExternalLink, GitCompare, Info, PlayCircle, Radar, Rocket, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
@@ -413,6 +413,30 @@ export function OverviewPage() {
           >
             Se datakilder
           </Link>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="about-concept-heading"
+        className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+      >
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-3">
+          <Info className="h-5 w-5 shrink-0 text-slate-500 sm:mt-0.5" aria-hidden="true" />
+          <div>
+            <h2
+              id="about-concept-heading"
+              className="text-base font-semibold text-slate-900"
+            >
+              Om konseptdemoen
+            </h2>
+            <p className="mt-1 text-sm text-slate-700">
+              Agentkart er en statisk konseptdemo. Alle data behandles lokalt i nettleseren
+              og sendes aldri til en server. Innebygde eksempler er syntetiske, og
+              rapportene bygger på importerte JSON-filer – ikke en aktiv nettverksskanning.
+              Kontrollreglene og referansene til rammeverk som EU AI Act er
+              styringshjelpemidler for demonstrasjon, ikke en juridisk vurdering.
+            </p>
+          </div>
         </div>
       </section>
 

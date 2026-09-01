@@ -481,7 +481,10 @@ export function ruleUncontrolledMcp(agent: ReconciledAgent, now: Date): Finding 
     ruleId: 'AK-R5',
     severity: 'high',
     agent,
-    summary: `Observert ${problematic.length} uverifisert MCP-server(e).`,
+    summary:
+      problematic.length === 1
+        ? 'Observert 1 uverifisert MCP-server.'
+        : `Observert ${problematic.length} uverifiserte MCP-servere.`,
     explanation:
       'Én eller flere MCP-servere som agenten bruker er ikke verifiserte eller godkjente i registeret.',
     recommendedAction:

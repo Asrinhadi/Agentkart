@@ -53,7 +53,7 @@ export function SourcesPage() {
         setDeclared(res.data);
         setRegistryStatus({
           kind: 'ok',
-          message: `Importerte ${res.data.agents.length} registerte agenter fra «${file.name}».`,
+          message: `Importerte ${res.data.agents.length} registrerte agenter fra «${file.name}».`,
         });
       } else {
         setRegistryStatus(toStatus(res.error));
@@ -78,7 +78,7 @@ export function SourcesPage() {
       <header>
         <h1 className="text-2xl font-semibold text-slate-900">Datakilder</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Kildene som demoen sammenstiller. Konseptdemo – ingen aktiv nettverksskanning kjøres.
+          Kildene som demoen sammenstiller.
         </p>
       </header>
 
@@ -148,10 +148,10 @@ export function SourcesPage() {
       <section className="rounded-lg border border-sky-200 bg-sky-50 p-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-xl">
-            <h2 className="text-base font-semibold text-sky-900">Om filbehandling</h2>
+            <h2 className="text-base font-semibold text-sky-900">Filbehandling</h2>
             <p className="mt-1 text-sm text-sky-900/90">
-              Filen behandles bare i nettleseren og sendes ikke til en server. Ikke bruk reelle
-              personopplysninger i konseptdemoen. Maks 1 MB og 500 poster per fil.
+              Filer leses lokalt (maks 1 MB, 500 poster). Ikke last opp reelle
+              personopplysninger.
             </p>
           </div>
           <button
@@ -169,7 +169,7 @@ export function SourcesPage() {
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h3 className="text-base font-semibold text-slate-900">Importer godkjent register</h3>
           <p className="mt-1 text-sm text-slate-600">
-            Aktivt sett har {declared.length} registrerte agenter (generert{' '}
+            Det aktive datasettet inneholder {declared.length} registrerte agenter (generert{' '}
             {formatDateNb(declaredGeneratedAt)}).
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -219,7 +219,7 @@ export function SourcesPage() {
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h3 className="text-base font-semibold text-slate-900">Importer tekniske observasjoner</h3>
           <p className="mt-1 text-sm text-slate-600">
-            Aktivt sett har {observed.length} observasjoner (generert{' '}
+            Det aktive datasettet inneholder {observed.length} observasjoner (generert{' '}
             {formatDateNb(observedGeneratedAt)}).
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
