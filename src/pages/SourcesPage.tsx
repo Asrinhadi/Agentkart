@@ -9,6 +9,7 @@ import {
 } from '../services/import.ts';
 import { formatDateNb } from '../utils/format.ts';
 import { sourceStatusLabel, sourceTypeLabel } from '../utils/labels.ts';
+import { SIGNAL_CATALOG } from '../data/signalCatalog.ts';
 
 type ImportKind = 'registry' | 'observations';
 
@@ -84,26 +85,43 @@ export function SourcesPage() {
 
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900">Registrerte datakilder</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Dekning viser hvor stor del av miljøet kilden ser. En høy dekning gjør et lite antall
+          funn troverdig; en lav dekning betyr at fravær ikke er bevis på fravær.
+        </p>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th scope="col" className="px-3 py-2">Navn</th>
                 <th scope="col" className="px-3 py-2">Type</th>
+                <th scope="col" className="px-3 py-2">Innsamling</th>
                 <th scope="col" className="px-3 py-2">Status</th>
+                <th scope="col" className="px-3 py-2">Dekning</th>
                 <th scope="col" className="px-3 py-2">Observasjoner</th>
                 <th scope="col" className="px-3 py-2">Sist observert</th>
-                <th scope="col" className="px-3 py-2">Dekning</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {sources.map((s) => {
                 const isRegistry = s.type === 'declared_registry';
                 const observationsForSource = observationsBySource.get(s.sourceId) ?? 0;
+                const pct = s.coveragePercent;
+                const coverageTone =
+                  pct === undefined
+                    ? 'muted'
+                    : pct >= 80
+                      ? 'ok'
+                      : pct >= 60
+                        ? 'warning'
+                        : 'critical';
                 return (
-                  <tr key={s.sourceId}>
+                  <tr key={s.sourceId} className="align-top">
                     <td className="px-3 py-2 font-medium text-slate-900">{s.name}</td>
                     <td className="px-3 py-2 text-slate-700">{sourceTypeLabel(s.type)}</td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {s.collectionMethod ?? '—'}
+                    </td>
                     <td className="px-3 py-2">
                       <Badge
                         tone={
@@ -118,6 +136,26 @@ export function SourcesPage() {
                       </Badge>
                     </td>
                     <td className="px-3 py-2 text-slate-700">
+                      {isRegistry ? (
+                        <span className="text-xs text-slate-500">
+                          Ikke en teknisk observasjonskilde
+                        </span>
+                      ) : (
+                        <div className="min-w-[9rem]">
+                          <div className="flex items-center gap-2">
+                            {pct !== undefined ? (
+                              <Badge tone={coverageTone}>{pct} %</Badge>
+                            ) : (
+                              <Badge tone="muted">Ukjent</Badge>
+                            )}
+                          </div>
+                          <div className="mt-1 text-xs text-slate-500">
+                            {s.coverage ?? '—'}
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
                       {isRegistry
                         ? `${declared.length} registerposter`
                         : observationsForSource}
@@ -125,21 +163,43 @@ export function SourcesPage() {
                     <td className="px-3 py-2 text-slate-700">
                       {formatDateNb(s.lastObservedAt)}
                     </td>
-                    <td className="px-3 py-2 text-slate-700">
-                      {isRegistry ? (
-                        <span>
-                          {s.coverage ?? '—'}
-                          <span className="ml-1 block text-xs text-slate-500">
-                            Ikke en teknisk observasjonskilde.
-                          </span>
-                        </span>
-                      ) : (
-                        (s.coverage ?? '—')
-                      )}
-                    </td>
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="signal-catalog-heading"
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <h2 id="signal-catalog-heading" className="text-lg font-semibold text-slate-900">
+          Signalkatalog
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Hva slags signaler kan brukes til å oppdage KI-agenter, hva beviser hvert av dem, og
+          hvor svake er de? Katalogen er statisk og forklarer «hvorfor stoler vi på dette?»
+          bak hver observasjon.
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th scope="col" className="px-3 py-2">Signal</th>
+                <th scope="col" className="px-3 py-2">Beviser</th>
+                <th scope="col" className="px-3 py-2">Svakhet</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {SIGNAL_CATALOG.map((s) => (
+                <tr key={s.type} className="align-top">
+                  <td className="px-3 py-2 font-medium text-slate-900">{s.label}</td>
+                  <td className="px-3 py-2 text-slate-700">{s.proves}</td>
+                  <td className="px-3 py-2 text-slate-700">{s.weakness}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

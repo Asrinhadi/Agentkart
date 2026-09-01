@@ -7,6 +7,12 @@ import { STATUS_LABEL, overallStatus } from '../domain/status.ts';
 import type { OverallAgentStatus, Severity } from '../domain/types.ts';
 import { formatDateShortNb } from '../utils/format.ts';
 import { approvalLabel, envLabel } from '../utils/labels.ts';
+import {
+  REGISTRATION_LABEL,
+  REGISTRATION_TONE,
+  RISK_LEVEL_LABEL,
+  RISK_LEVEL_TONE,
+} from '../utils/riskLabels.ts';
 
 const STATUS_ORDER: OverallAgentStatus[] = [
   'critical',
@@ -340,12 +346,13 @@ export function AgentsPage() {
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th scope="col" className="px-3 py-2">Agent</th>
+                <th scope="col" className="px-3 py-2">Klasse</th>
+                <th scope="col" className="px-3 py-2">Risiko</th>
                 <th scope="col" className="px-3 py-2">Miljø</th>
                 <th scope="col" className="px-3 py-2">Rammeverk</th>
                 <th scope="col" className="px-3 py-2">Eier</th>
-                <th scope="col" className="px-3 py-2">Observasjonskilder</th>
+                <th scope="col" className="px-3 py-2">Kilder</th>
                 <th scope="col" className="px-3 py-2">Tilgang</th>
-                <th scope="col" className="px-3 py-2">Godkjenning</th>
                 <th scope="col" className="px-3 py-2">Sist vurdert</th>
                 <th scope="col" className="px-3 py-2">Status</th>
               </tr>
@@ -353,7 +360,7 @@ export function AgentsPage() {
             <tbody className="divide-y divide-slate-100">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-6 text-center text-sm text-slate-500">
+                  <td colSpan={10} className="px-3 py-6 text-center text-sm text-slate-500">
                     Ingen agenter matcher filtrene. Prøv å nullstille filtrene.
                   </td>
                 </tr>
@@ -374,6 +381,16 @@ export function AgentsPage() {
                     className="cursor-pointer hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
                   >
                     <td className="px-3 py-2 font-medium text-slate-900">{row.agent.displayName}</td>
+                    <td className="px-3 py-2">
+                      <Badge tone={REGISTRATION_TONE[row.agent.classification.klass]}>
+                        {REGISTRATION_LABEL[row.agent.classification.klass]}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Badge tone={RISK_LEVEL_TONE[row.agent.risk.level]}>
+                        {RISK_LEVEL_LABEL[row.agent.risk.level]}
+                      </Badge>
+                    </td>
                     <td className="px-3 py-2 text-slate-700">{envLabel(row.env)}</td>
                     <td className="px-3 py-2 text-slate-700">{row.framework}</td>
                     <td className="px-3 py-2 text-slate-700">{row.owner ?? '—'}</td>
@@ -381,7 +398,6 @@ export function AgentsPage() {
                       {row.sourceIds.length === 0 ? '—' : row.sourceIds.length}
                     </td>
                     <td className="px-3 py-2 text-slate-700">{row.write}</td>
-                    <td className="px-3 py-2 text-slate-700">{row.approval}</td>
                     <td className="px-3 py-2 text-slate-700">
                       {formatDateShortNb(row.lastReviewed)}
                     </td>

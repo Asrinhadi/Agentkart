@@ -100,6 +100,15 @@ export function OverviewPage() {
     findings.filter((f) => f.severity === 'critical').map((f) => f.agentId),
   ).size;
 
+  const matchStateCounts = {
+    matched: reconciled.filter((a) => a.matchStatus === 'matched').length,
+    drift: reconciled.filter((a) => a.matchStatus === 'drift').length,
+    declaration_only: reconciled.filter((a) => a.matchStatus === 'declaration_only').length,
+    observation_only: reconciled.filter(
+      (a) => a.matchStatus === 'observation_only' || a.matchStatus === 'ambiguous',
+    ).length,
+  };
+
   const envCounts = { production: 0, test: 0, development: 0, unknown: 0 };
   for (const agent of reconciled) {
     const env =
@@ -215,6 +224,45 @@ export function OverviewPage() {
             to="/findings?severity=critical"
             linkLabel="Åpne kritiske avvik"
           />
+        </div>
+
+        <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Fire tilstander mellom register og observasjon
+          </div>
+          <ul className="grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
+            {[
+              {
+                key: 'matched',
+                label: 'Deklarert og observert',
+                count: matchStateCounts.matched,
+                tone: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+              },
+              {
+                key: 'drift',
+                label: 'Observert med avvik',
+                count: matchStateCounts.drift,
+                tone: 'bg-amber-50 border-amber-200 text-amber-900',
+              },
+              {
+                key: 'declaration_only',
+                label: 'Deklarert, ikke observert',
+                count: matchStateCounts.declaration_only,
+                tone: 'bg-sky-50 border-sky-200 text-sky-900',
+              },
+              {
+                key: 'observation_only',
+                label: 'Observert, ikke deklarert',
+                count: matchStateCounts.observation_only,
+                tone: 'bg-red-50 border-red-200 text-red-900',
+              },
+            ].map((s) => (
+              <li key={s.key} className={`flex items-center justify-between rounded-md border px-3 py-2 ${s.tone}`}>
+                <span>{s.label}</span>
+                <span className="text-lg font-semibold">{s.count}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

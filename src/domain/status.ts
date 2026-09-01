@@ -21,6 +21,9 @@ export function overallStatus(
   if (agent.matchStatus === 'declaration_only') {
     return 'declared_only';
   }
+  if (agent.matchStatus === 'drift') {
+    return 'needs_review';
+  }
   return 'ok';
 }
 

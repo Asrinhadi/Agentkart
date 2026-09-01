@@ -26,6 +26,17 @@ const lifecycleSchema = z.enum(['idea', 'pilot', 'active', 'retired']);
 const approvalSchema = z.enum(['not_required', 'pending', 'approved', 'rejected']);
 const permissionSchema = z.enum(['read', 'write', 'execute']);
 const sourceTypeSchema = z.enum(['declared_registry', 'code_scan', 'endpoint', 'platform']);
+const signalTypeSchema = z.enum([
+  'dns_sni',
+  'proxy_log',
+  'identity_provider',
+  'non_interactive_login',
+  'saas_admin_api',
+  'edr_process',
+  'finance_invoice',
+  'repo_scan',
+  'declared_registry',
+]);
 
 const dataCategoriesSchema = z.array(shortText).max(MAX_ARR);
 const approvedMcpSchema = z.array(shortText).max(MAX_ARR);
@@ -96,9 +107,14 @@ export const observationSourceSchema = z
     sourceId: shortText,
     name: shortText,
     type: sourceTypeSchema,
+    signalType: signalTypeSchema.optional(),
     status: z.enum(['ok', 'degraded', 'unavailable']),
     lastObservedAt: optionalIsoDate,
     coverage: optionalShortText,
+    coveragePercent: z.number().int().min(0).max(100).optional(),
+    collectionMethod: optionalShortText,
+    proves: optionalShortText,
+    weakness: optionalShortText,
   })
   .strict();
 

@@ -1,9 +1,13 @@
 import type {
+  CorrelationClaim,
   DeclaredAgent,
   Evidence,
+  MatchStatus,
   ObservedAgent,
   ReconciledAgent,
 } from './types.ts';
+import { classifyAgent } from './classification.ts';
+import { assessRisk } from './risk.ts';
 
 export function normalizeKey(value: string | undefined | null): string {
   if (!value) return '';
@@ -272,16 +276,33 @@ export function reconcile(
 
   const agents: ReconciledAgent[] = [];
 
+  const DRIFT_FIELDS = new Set(['environment', 'framework', 'writeCapability', 'humanApproval']);
+
   for (const decl of declaredCopy) {
     const obsList = matchedDeclared.get(decl.agentKey) ?? [];
     const evidence = buildEvidence(decl, obsList, []);
+    let matchStatus: MatchStatus;
+    if (obsList.length === 0) {
+      matchStatus = 'declaration_only';
+    } else {
+      const hasDrift = evidence.some(
+        (e) => e.kind === 'mismatch' && e.field && DRIFT_FIELDS.has(e.field),
+      );
+      matchStatus = hasDrift ? 'drift' : 'matched';
+    }
+    const classification = classifyAgent(decl, obsList);
+    const risk = assessRisk(decl, obsList, 'other');
+    const correlation = buildCorrelation(obsList, matchStatus);
     agents.push({
       id: `declared:${decl.agentKey}`,
       displayName: decl.name,
-      matchStatus: obsList.length > 0 ? 'matched' : 'declaration_only',
+      matchStatus,
       declared: decl,
       observations: obsList,
       evidence,
+      classification,
+      risk,
+      correlation,
     });
   }
 
@@ -290,16 +311,47 @@ export function reconcile(
     const evidence = buildEvidence(null, obsList, possible);
     const first = obsList[0];
     const name = first ? first.name : bucketKey;
+    const matchStatus: MatchStatus = possible.length > 0 ? 'ambiguous' : 'observation_only';
+    const classification = classifyAgent(null, obsList);
+    const risk = assessRisk(null, obsList, matchStatus);
+    const correlation = buildCorrelation(obsList, matchStatus);
     agents.push({
       id: `observed:${bucketKey}`,
       displayName: name,
-      matchStatus: possible.length > 0 ? 'ambiguous' : 'observation_only',
+      matchStatus,
       declared: null,
       observations: obsList,
       evidence,
       possibleLinks: possible,
+      classification,
+      risk,
+      correlation,
     });
   }
 
   return { agents };
+}
+
+function buildCorrelation(
+  observations: readonly ObservedAgent[],
+  matchStatus: MatchStatus,
+): CorrelationClaim {
+  const signalCount = observations.length;
+  const sourceCount = new Set(observations.map((o) => o.sourceId)).size;
+  if (signalCount === 0) {
+    return { signalCount: 0, sourceCount: 0, text: 'Ingen tekniske observasjoner å korrelere.' };
+  }
+  const strength =
+    matchStatus === 'matched'
+      ? 'bekreftet mot register'
+      : matchStatus === 'drift'
+        ? 'bekreftet mot register, men med observerte avvik'
+        : matchStatus === 'ambiguous'
+          ? 'flere mulige treff – må bekreftes manuelt'
+          : 'sannsynlig samme agent';
+  return {
+    signalCount,
+    sourceCount,
+    text: `Satt sammen fra ${signalCount} signal(er) i ${sourceCount} kilde(r) – ${strength}.`,
+  };
 }

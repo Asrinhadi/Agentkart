@@ -24,13 +24,36 @@ export interface McpServer {
   description?: string;
 }
 
+export type SignalType =
+  | 'dns_sni'
+  | 'proxy_log'
+  | 'identity_provider'
+  | 'non_interactive_login'
+  | 'saas_admin_api'
+  | 'edr_process'
+  | 'finance_invoice'
+  | 'repo_scan'
+  | 'declared_registry';
+
 export interface ObservationSource {
   sourceId: string;
   name: string;
   type: SourceType;
+  signalType?: SignalType;
   status: 'ok' | 'degraded' | 'unavailable';
   lastObservedAt?: string;
   coverage?: string;
+  coveragePercent?: number;
+  collectionMethod?: string;
+  proves?: string;
+  weakness?: string;
+}
+
+export interface SignalCatalogEntry {
+  type: SignalType;
+  label: string;
+  proves: string;
+  weakness: string;
 }
 
 export interface DeclaredAgent {
@@ -92,9 +115,73 @@ export interface Evidence {
 
 export type MatchStatus =
   | 'matched'
+  | 'drift'
   | 'observation_only'
   | 'declaration_only'
   | 'ambiguous';
+
+export type RegistrationClass = 'tool' | 'automation' | 'agent' | 'unknown';
+
+export interface RegistrationCriteria {
+  ownIdentity: boolean | null;
+  canWrite: boolean | null;
+  modelChoosesAction: boolean | null;
+  runsWithoutStepApproval: boolean | null;
+}
+
+export interface Classification {
+  klass: RegistrationClass;
+  criteria: RegistrationCriteria;
+  reasoning: string;
+  excluded: string[];
+}
+
+export type RightsLevel = 'read' | 'write' | 'administer' | 'can_escalate' | 'unknown';
+export type DataSensitivity = 'open' | 'internal' | 'personal' | 'special_category' | 'unknown';
+export type AutonomyLevel =
+  | 'suggests'
+  | 'acts_after_approval'
+  | 'acts_within_frame'
+  | 'initiates'
+  | 'unknown';
+export type ReachLevel =
+  | 'single_user'
+  | 'team'
+  | 'organization'
+  | 'customers_and_external'
+  | 'unknown';
+export type ReversibilityLevel = 'easy' | 'hard' | 'irreversible' | 'unknown';
+
+export interface RiskDimensions {
+  rights: RightsLevel;
+  data: DataSensitivity;
+  autonomy: AutonomyLevel;
+  reach: ReachLevel;
+  reversibility: ReversibilityLevel;
+}
+
+export type RiskLevel = 'unknown' | 'low' | 'medium' | 'high' | 'critical';
+
+export interface Mitigation {
+  key: string;
+  label: string;
+  present: boolean;
+}
+
+export interface RiskAssessment {
+  level: RiskLevel;
+  headline: string;
+  dimensions: RiskDimensions;
+  mitigations: Mitigation[];
+  loweredByControls: boolean;
+  driverDimension: keyof RiskDimensions | null;
+}
+
+export interface CorrelationClaim {
+  signalCount: number;
+  sourceCount: number;
+  text: string;
+}
 
 export type OverallAgentStatus =
   | 'ok'
@@ -111,6 +198,9 @@ export interface ReconciledAgent {
   observations: ObservedAgent[];
   evidence: Evidence[];
   possibleLinks?: string[];
+  classification: Classification;
+  risk: RiskAssessment;
+  correlation: CorrelationClaim;
 }
 
 export interface Finding {

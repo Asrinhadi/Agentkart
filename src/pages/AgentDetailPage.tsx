@@ -11,7 +11,13 @@ import {
   lifecycleLabel,
   toolPermissionLabel,
 } from '../utils/labels.ts';
-import type { Evidence, ReconciledAgent } from '../domain/types.ts';
+import {
+  REGISTRATION_LABEL,
+  REGISTRATION_TONE,
+  RISK_LEVEL_LABEL,
+  RISK_LEVEL_TONE,
+} from '../utils/riskLabels.ts';
+import type { Evidence, ReconciledAgent, RegistrationCriteria } from '../domain/types.ts';
 
 function renderValue(v: unknown, boolAsYesNo = true): string {
   if (v === null || v === undefined) return '—';
@@ -203,19 +209,135 @@ function DetailContent({ agent }: { agent: ReconciledAgent }) {
               'Ingen beskrivelse funnet fra register eller observasjon.'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge tone={tone}>{STATUS_LABEL[status]}</Badge>
           <Badge tone="muted">
             {agent.matchStatus === 'matched'
               ? 'Register + observasjon'
-              : agent.matchStatus === 'declaration_only'
-                ? 'Kun registrert'
-                : agent.matchStatus === 'observation_only'
-                  ? 'Kun observert'
-                  : 'Må bekreftes'}
+              : agent.matchStatus === 'drift'
+                ? 'Avvik mellom register og observasjon'
+                : agent.matchStatus === 'declaration_only'
+                  ? 'Kun registrert'
+                  : agent.matchStatus === 'observation_only'
+                    ? 'Kun observert'
+                    : 'Må bekreftes'}
+          </Badge>
+          <Badge tone={REGISTRATION_TONE[agent.classification.klass]}>
+            {REGISTRATION_LABEL[agent.classification.klass]}
+          </Badge>
+          <Badge tone={RISK_LEVEL_TONE[agent.risk.level]}>
+            Risiko: {RISK_LEVEL_LABEL[agent.risk.level]}
           </Badge>
         </div>
       </div>
+
+      <section
+        aria-labelledby="risk-heading"
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <h2 id="risk-heading" className="text-base font-semibold text-slate-900">
+          Risikovurdering
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-slate-800">{agent.risk.headline}</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
+          {(
+            [
+              { key: 'rights', label: 'Rettigheter' },
+              { key: 'data', label: 'Data' },
+              { key: 'autonomy', label: 'Autonomi' },
+              { key: 'reach', label: 'Rekkevidde' },
+              { key: 'reversibility', label: 'Reversibilitet' },
+            ] as const
+          ).map((d) => (
+            <div
+              key={d.key}
+              className={`rounded-md border p-2 ${
+                agent.risk.driverDimension === d.key
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-slate-200 bg-slate-50'
+              }`}
+            >
+              <div className="text-slate-500">{d.label}</div>
+              <div className="mt-0.5 font-medium text-slate-900">
+                {agent.risk.dimensions[d.key]}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3">
+          <div className="text-xs uppercase text-slate-500">Dempende kontroller</div>
+          <ul className="mt-1 flex flex-wrap gap-2">
+            {agent.risk.mitigations.map((m) => (
+              <li key={m.key}>
+                <Badge tone={m.present ? 'ok' : 'muted'}>
+                  {m.present ? '✓' : '—'} {m.label}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+          {agent.risk.loweredByControls ? (
+            <p className="mt-2 text-xs text-slate-500">
+              Nivået er senket ett hakk fordi minst to dokumenterte kontroller er til stede. Uten
+              kontrollene ville risikoen vært ett trinn høyere.
+            </p>
+          ) : null}
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="class-heading"
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <h2 id="class-heading" className="text-base font-semibold text-slate-900">
+          Klassifisering: {REGISTRATION_LABEL[agent.classification.klass]}
+        </h2>
+        <p className="mt-2 text-sm text-slate-700">{agent.classification.reasoning}</p>
+        <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+          {(
+            [
+              { key: 'ownIdentity', label: 'Har egen identitet eller nøkkel' },
+              { key: 'canWrite', label: 'Kan skrive (ikke bare lese)' },
+              { key: 'modelChoosesAction', label: 'Modellen velger handlingen' },
+              { key: 'runsWithoutStepApproval', label: 'Kjører uten godkjenning per steg' },
+            ] as const
+          ).map((c) => {
+            const v = agent.classification.criteria[c.key as keyof RegistrationCriteria];
+            const symbol = v === true ? '✓ Ja' : v === false ? '✕ Nei' : '? Ukjent';
+            const cls =
+              v === true
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                : v === false
+                  ? 'border-slate-200 bg-slate-50 text-slate-700'
+                  : 'border-amber-200 bg-amber-50 text-amber-900';
+            return (
+              <div key={c.key} className={`flex items-center justify-between rounded-md border px-2 py-1.5 ${cls}`}>
+                <span>{c.label}</span>
+                <span className="font-medium">{symbol}</span>
+              </div>
+            );
+          })}
+        </div>
+        <details className="mt-3 text-sm text-slate-600">
+          <summary className="cursor-pointer text-sky-700 hover:underline">
+            Bevisst utenfor klassifiseringen
+          </summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {agent.classification.excluded.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        </details>
+      </section>
+
+      <section
+        aria-labelledby="corr-heading"
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <h2 id="corr-heading" className="text-base font-semibold text-slate-900">
+          Korrelering
+        </h2>
+        <p className="mt-2 text-sm text-slate-700">{agent.correlation.text}</p>
+      </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
