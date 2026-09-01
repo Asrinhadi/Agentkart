@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, CheckCircle2, Database, ExternalLink, PlayCircle, Rocket, ShieldAlert, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Database, ExternalLink, GitCompare, PlayCircle, Radar, Rocket, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import { useAgentkart } from '../app/AgentkartContext.tsx';
 import { Badge, SeverityBadge } from '../components/StatusBadge.tsx';
 import { formatDateNb } from '../utils/format.ts';
@@ -326,15 +326,81 @@ export function OverviewPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-sky-200 bg-sky-50 p-4">
-        <h2 className="text-base font-semibold text-sky-900">Deklarert vs. observert</h2>
-        <p className="mt-2 text-sm text-sky-900/90">
-          Deklarert informasjon kommer fra virksomhetens agentregister og beskriver hva som er
-          godkjent. Observert informasjon kommer fra tekniske datakilder som endepunktskann,
-          kodeskann og plattformregistre. Agentkart sammenligner disse to bildene lokalt i
-          nettleseren og markerer motstrid, skyggeagenter og risiko.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+      <section aria-labelledby="flow-heading">
+        <div className="mb-4">
+          <h2 id="flow-heading" className="text-xl font-semibold text-slate-900">
+            Slik fungerer det
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Fire steg – fra to uavhengige kilder til konkrete tiltak.
+          </p>
+        </div>
+
+        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              step: '1',
+              icon: ClipboardCheck,
+              tone: 'sky',
+              title: 'Godkjent register',
+              text: 'Slik virksomheten mener det ser ut – hva som er godkjent og hvem som eier det.',
+            },
+            {
+              step: '2',
+              icon: Radar,
+              tone: 'emerald',
+              title: 'Tekniske observasjoner',
+              text: 'Slik datakildene faktisk ser det – hvilke agenter som kjører, med hvilke tilganger.',
+            },
+            {
+              step: '3',
+              icon: GitCompare,
+              tone: 'amber',
+              title: 'Avstemming',
+              text: 'De to bildene matches deterministisk. Tvetydige treff slås aldri sammen automatisk.',
+            },
+            {
+              step: '4',
+              icon: ShieldCheck,
+              tone: 'red',
+              title: 'Funn og tiltak',
+              text: 'Åtte kontrollregler produserer risikofunn med evidens og anbefalt handling.',
+            },
+          ].map((s, i, arr) => {
+            const Icon = s.icon;
+            const iconClass = {
+              sky: 'bg-sky-100 text-sky-700',
+              emerald: 'bg-emerald-100 text-emerald-700',
+              amber: 'bg-amber-100 text-amber-800',
+              red: 'bg-red-100 text-red-700',
+            }[s.tone];
+            return (
+              <li
+                key={s.step}
+                className="relative flex flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${iconClass}`}>
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Steg {s.step}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-base font-semibold text-slate-900">{s.title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{s.text}</p>
+                {i < arr.length - 1 ? (
+                  <ArrowRight
+                    className="absolute -right-3 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-slate-300 lg:block"
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="mt-4 flex flex-wrap gap-2">
           <Link
             to="/agents"
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
